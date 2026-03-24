@@ -90,6 +90,61 @@ class DiscordNotifier:
             logger.error(f"Unexpected error sending Discord message: {str(e)}", exc_info=True)
             return False
 
+    def send_digest_summary(self, digest: dict, language: str = "en") -> bool:
+        """
+        Send a Discord embed summary of the digest.
+
+        Args:
+            digest: Dict produced by Summarizer.summarize().
+            language: Language code for the title suffix.
+
+        Returns:
+            True if message sent successfully, False otherwise.
+        """
+        if not self.webhook_url:
+            logger.error("Discord webhook URL not configured. Skipping.")
+            return False
+
+        date = digest.get("date", "")
+        headline = digest.get("headline", "AI News Digest")
+        categories = digest.get("categories", [])
+        lang_suffix = f" [{language.upper()}]" if language != "en" else ""
+        title = f"\U0001f4f0 AI News \u2014 {date}{lang_suffix}"
+
+        fields = []
+        for cat in categories:
+            cat_name = cat.get("name", "")
+            stories = cat.get("stories", [])
+            if not stories:
+                continue
+            sorted_stories = sorted(
+                stories,
+                key=lambda s: {"high": 0, "medium": 1, "low": 2}.get(
+                    s.get("importance", "medium"), 1
+                ),
+            )
+            value = "\n".join(
+                f"• [{s.get('title', '')}]({s.get('url', '#')})"
+                for s in sorted_stories[:3]
+            )
+            fields.append({"name": cat_name, "value": value[:1024], "inline": False})
+
+        embed = {
+            "title": title,
+            "description": headline,
+            "color": 0x0366D6,
+            "fields": fields[:25],
+            "timestamp": datetime.now().isoformat(),
+            "footer": {
+                "text": "AI News Bot \u2022 github.com/giftedunicorn/ai-news-bot"
+            },
+        }
+
+        if self._send_message([embed]):
+            logger.info("Digest summary sent to Discord successfully")
+            return True
+        return False
+
     def _send_message(self, embeds: List[Dict[str, Any]]) -> bool:
         """
         Send a Discord message with embeds.

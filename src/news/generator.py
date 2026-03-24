@@ -8,6 +8,7 @@ from ..logger import setup_logger
 from ..config import LANGUAGE_NAMES
 from .web_search import WebSearchTool, get_search_tool_definition
 from .fetcher import NewsFetcher
+from .deduper import deduplicate_news_data
 from ..llm_providers import get_llm_provider
 
 
@@ -131,6 +132,9 @@ class NewsGenerator:
                 language=language,
                 max_items_per_source=max_items_per_source
             )
+
+            # Deduplicate news items before prompting the LLM
+            news_data = deduplicate_news_data(news_data)
 
             if not news_data['international'] and not news_data['domestic']:
                 error_msg = "No news items fetched from RSS sources. Please check your network connection or RSS feed availability."

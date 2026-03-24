@@ -19,6 +19,15 @@ news:
   # Default: false (recommended to keep disabled)
   enable_web_search: false
 
+  # Topics of interest — passed to the LLM to guide story selection
+  topics:
+    - Artificial Intelligence
+    - Machine Learning
+    - Large Language Models
+    - AI Research
+    - AI Products & Startups
+    - AI Policy & Regulation
+
   # Maximum news items to fetch per source (fetch more for AI to select from)
   max_items_per_source: 10
 

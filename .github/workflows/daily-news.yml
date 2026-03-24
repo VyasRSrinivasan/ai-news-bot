@@ -11,6 +11,8 @@ on:
 jobs:
   generate-and-send-news:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -76,6 +78,16 @@ jobs:
           # The bot will generate and send news for each language separately
           AI_RESPONSE_LANGUAGE: ${{ secrets.AI_RESPONSE_LANGUAGE }}
 
+          # Optional: Telegram
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+          # Optional: Discord
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+          # Optional: Slack
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
         run: |
           python main.py
 
@@ -87,3 +99,12 @@ jobs:
           path: |
             *.log
           retention-days: 7
+
+      - name: Commit updated seen_urls.json
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add seen_urls.json
+          git diff --staged --quiet || git commit -m "chore: update seen_urls.json [skip ci]"
+          git push
