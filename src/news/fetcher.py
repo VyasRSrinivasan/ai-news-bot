@@ -45,6 +45,74 @@ class NewsFetcher:
             "Healthcare IT News AI": "https://www.healthcareitnews.com/taxonomy/term/31/feed",
             "Robotics Business Review": "https://www.roboticsbusinessreview.com/feed/",
             "Autonomous Vehicle News": "https://www.autonomousvehicleinternational.com/feed",
+
+            # Medical Specialties — Cardiology
+            "Google News Cardiology": "https://news.google.com/rss/search?q=cardiology&hl=en-US&gl=US&ceid=US:en",
+            "JACC (Cardiology)": "https://www.jacc.org/rss/current",
+            "Circulation (AHA)": "https://www.ahajournals.org/action/showFeed?type=etoc&feed=rss&jc=circ",
+
+            # Medical Specialties — Pulmonology
+            "Google News Pulmonology": "https://news.google.com/rss/search?q=pulmonology+lung+disease&hl=en-US&gl=US&ceid=US:en",
+            "Chest Journal": "https://journal.chestnet.org/rss/current",
+
+            # Medical Specialties — Nephrology
+            "Google News Nephrology": "https://news.google.com/rss/search?q=nephrology+kidney+disease&hl=en-US&gl=US&ceid=US:en",
+            "JASN (Nephrology)": "https://jasn.asnjournals.org/rss/current",
+
+            # Broad Medical News
+            "NEJM": "https://www.nejm.org/action/showFeed?jc=nejm&type=etoc&feed=rss",
+            "The Lancet": "https://www.thelancet.com/rssfeed/lancet_current.xml",
+
+            # Business & Finance
+            "Reuters Business": "https://feeds.reuters.com/reuters/businessNews",
+            "CNBC Technology": "https://www.cnbc.com/id/19854910/device/rss/rss.html",
+            "Google News Business": "https://news.google.com/rss/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRGRqTVhZU0FtcW9BUFViQQ?hl=en-US&gl=US&ceid=US:en",
+            "Bloomberg Technology": "https://feeds.bloomberg.com/technology/news.rss",
+
+            # Politics & Policy
+            "Politico Tech": "https://www.politico.com/rss/technology.xml",
+            "The Hill Tech": "https://thehill.com/policy/technology/feed/",
+            "Google News AI Policy": "https://news.google.com/rss/search?q=AI+policy+regulation+government&hl=en-US&gl=US&ceid=US:en",
+
+            # Robotics & EVs
+            "Electrek": "https://electrek.co/feed/",
+            "IEEE Spectrum": "https://spectrum.ieee.org/feeds/feed.rss",
+            "Google News EVs": "https://news.google.com/rss/search?q=electric+vehicle+EV&hl=en-US&gl=US&ceid=US:en",
+        }
+
+        # Mapping of topic-search categories to relevant feed names
+        self.category_feed_names = {
+            "Technology": [
+                "TechCrunch AI", "VentureBeat AI", "MIT Technology Review",
+                "Ars Technica AI", "Wired AI", "The Next Web", "The Verge AI",
+                "Engadget AI", "OpenAI Blog", "Google AI Blog", "DeepMind Blog",
+                "Meta AI Blog", "Microsoft AI Blog",
+            ],
+            "Business & Finance": [
+                "TechCrunch AI", "VentureBeat AI", "The Next Web",
+                "Reuters Business", "CNBC Technology", "Google News Business",
+                "Bloomberg Technology",
+            ],
+            "Science & Research": [
+                "arXiv AI", "arXiv Machine Learning", "arXiv Computer Vision",
+                "arXiv NLP", "MIT Technology Review", "DeepMind Blog",
+                "Google AI Blog",
+            ],
+            "Health & Medicine": [
+                "Healthcare IT News AI",
+                "Google News Cardiology", "JACC (Cardiology)", "Circulation (AHA)",
+                "Google News Pulmonology", "Chest Journal",
+                "Google News Nephrology", "JASN (Nephrology)",
+                "NEJM", "The Lancet",
+            ],
+            "Politics & Policy": [
+                "Wired AI", "MIT Technology Review", "Ars Technica AI",
+                "Politico Tech", "The Hill Tech", "Google News AI Policy",
+            ],
+            "Robotics & EVs": [
+                "Robotics Business Review", "Autonomous Vehicle News",
+                "Electrek", "IEEE Spectrum", "Google News EVs", "The Verge AI",
+            ],
         }
 
         # Chinese AI news sources (zh)
@@ -178,6 +246,21 @@ class NewsFetcher:
             "Google News AI (HI)": "https://news.google.com/rss/search?q=कृत्रिम+बुद्धिमत्ता&hl=hi&gl=IN&ceid=IN:hi",
         }
 
+
+    def get_feeds_for_category(self, category: str) -> Dict[str, str]:
+        """
+        Return the subset of rss_feeds relevant to a preset category.
+
+        Args:
+            category: One of the keys in category_feed_names.
+
+        Returns:
+            Dict of feed name → URL, or the full rss_feeds if category is unknown.
+        """
+        names = self.category_feed_names.get(category)
+        if not names:
+            return self.rss_feeds
+        return {name: self.rss_feeds[name] for name in names if name in self.rss_feeds}
 
     def fetch_rss_feed(self, feed_url: str, max_items: int = 10) -> List[Dict[str, str]]:
         """

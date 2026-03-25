@@ -27,6 +27,9 @@ news:
     - AI Research
     - AI Products & Startups
     - AI Policy & Regulation
+    - Cardiology
+    - Pulmonology
+    - Nephrology
 
   # Maximum news items to fetch per source (fetch more for AI to select from)
   max_items_per_source: 10
@@ -48,6 +51,7 @@ news:
       - ✅ Balanced coverage across categories (LLM, Agents, Research, Products, etc.)
       - ✅ Include both international and domestic news when available
       - ✅ Prefer primary sources over secondary reporting
+      - ✅ Include relevant articles on cardiology, pulmonology, and nephrology
 
       ### OUTPUT FORMAT:
       Return ONLY a JSON array of selected news IDs. No explanations, no markdown, just the JSON array.
@@ -74,6 +78,7 @@ news:
       5. **Product Launches & Updates** - New products, feature releases, API updates
       6. **AI Infrastructure & Hardware** - Chips, GPUs, training infrastructure, cloud services
       7. **Healthcare & Biomedical AI** - Medical AI, drug discovery, diagnostics
+      7a. **Cardiology, Pulmonology & Nephrology** - Heart, lung, and kidney disease research, clinical trials, treatments
       8. **Robotics & Autonomous Vehicles** - Robots, self-driving, embodied AI
       9. **Enterprise & Industry Applications** - B2B solutions, industry-specific AI
       10. **Funding & Market Dynamics** - Investments, acquisitions, valuations

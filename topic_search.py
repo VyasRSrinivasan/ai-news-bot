@@ -108,10 +108,21 @@ def main() -> int:
     args = parser.parse_args()
 
     # ── Resolve topic ─────────────────────────────────────────────────────────
+    preset_category: str | None = None
     if args.topic:
         topic = " ".join(args.topic).strip()
+        # Check if the CLI arg exactly matches a preset category name
+        matched = next((c for c in CATEGORIES if c[1].lower() == topic.lower()), None)
+        if matched and matched[0] != "7":
+            preset_category = matched[1]
+            topic = matched[1]
     else:
-        topic = _prompt_category()
+        result = _prompt_category()
+        # _prompt_category returns the category name for presets, custom text for option 7
+        matched = next((c for c in CATEGORIES if c[1] == result and c[0] != "7"), None)
+        if matched:
+            preset_category = matched[1]
+        topic = result
 
     if not topic:
         print("Error: topic cannot be empty.", file=sys.stderr)
@@ -129,6 +140,14 @@ def main() -> int:
 
     # ── Step 1: Agentic fetch ─────────────────────────────────────────────────
     fetcher = NewsFetcher()
+
+    # Restrict feeds to those curated for the selected preset category
+    if preset_category:
+        category_feeds = fetcher.get_feeds_for_category(preset_category)
+        if category_feeds:
+            fetcher.rss_feeds = category_feeds
+            print(f"Using {len(category_feeds)} curated sources for '{preset_category}'.")
+
     agent = TopicNewsAgent(
         provider_name=config.llm_provider,
         api_key=config.llm_api_key,
