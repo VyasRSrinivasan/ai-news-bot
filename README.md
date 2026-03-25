@@ -26,9 +26,9 @@
 
 <div align="center">
 
-| [✨ Features](#features) | [🚀 Quick Start](#quick-start-local-development) | [🔍 Topic Search](#interactive-topic-search) | [⚙️ Configuration](#configuration) |
-| :----------------------: | :----------------------------------------------: | :------------------------------------------: | :---------------------------------: |
-| [🤖 LLM Providers](#llm-provider-configuration) | [🌍 Languages](#language-configuration) | [📧 Email Setup](#email-setup-guide) | [🔧 Troubleshooting](#troubleshooting) |
+| [🟢 Beginner's Guide](#-beginners-guide--start-here-if-youre-new) | [✨ Features](#features) | [🚀 Quick Start](#quick-start-github-actions--recommended) | [🔍 Topic Search](#interactive-topic-search) |
+| :---------------------------------------------------------------: | :---------------------: | :---------------------------------------------------------: | :------------------------------------------: |
+| [⚙️ Configuration](#configuration) | [🤖 LLM Providers](#llm-provider-configuration) | [📧 Email Setup](#email-setup-guide) | [🔧 Troubleshooting](#troubleshooting) |
 
 </div>
 
@@ -59,6 +59,145 @@
 | ![Chinese AI News Digest](image/screenshot1.png) | ![English AI News Digest](image/screenshot2.png) |
 
 </div>
+
+---
+
+## 🟢 Beginner's Guide — Start Here If You're New
+
+> **Not a developer?** No problem. This section walks you through everything from scratch in plain English. Skip to [Quick Start (GitHub Actions)](#quick-start-github-actions--recommended) if you already know your way around.
+
+### What Is This?
+
+AI News Bot is a program that automatically collects news from the internet, summarizes it using an AI (like ChatGPT, but from a different company), and sends you a neat digest to your phone or email every day — or whenever you ask for it.
+
+You'll need:
+- A free **GitHub account** (to host the automation)
+- An **AI API key** (the "key" that lets the bot use an AI to write summaries — costs a few cents per run)
+- A **Telegram account** (the easiest way to receive the news — it's a free messaging app)
+
+---
+
+### Step 1 — Install Python on Your Computer
+
+Python is the programming language this bot is written in. You only need this if you want to run it on your own computer (not GitHub).
+
+**Mac:**
+1. Open the **Terminal** app (press `Command + Space`, type `Terminal`, press Enter)
+2. Paste this and press Enter:
+   ```
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
+3. After that finishes, paste this and press Enter:
+   ```
+   brew install python
+   ```
+4. Verify it worked by typing `python3 --version` — you should see a version number
+
+**Windows:**
+1. Go to [python.org/downloads](https://www.python.org/downloads/) and click **Download Python**
+2. Run the installer — **check the box that says "Add Python to PATH"** before clicking Install
+3. Open **Command Prompt** (press `Windows key`, type `cmd`, press Enter)
+4. Type `python --version` — you should see a version number
+
+---
+
+### Step 2 — Download This Project
+
+1. At the top of this GitHub page, click the green **Code** button
+2. Click **Download ZIP**
+3. Unzip the downloaded file to a folder on your Desktop (e.g. `ai-news-bot`)
+
+---
+
+### Step 3 — Get a Claude API Key (Free to Start)
+
+The bot needs an AI to read the news and write summaries. Claude (by Anthropic) works best.
+
+1. Go to [console.anthropic.com](https://console.anthropic.com/) and create a free account
+2. Once logged in, click **API Keys** in the left sidebar
+3. Click **Create Key**, give it a name (e.g. "news-bot"), and copy the key — it starts with `sk-ant-`
+4. **Save this key somewhere safe** — you won't be able to see it again
+
+> **Cost note:** Claude charges a small fee per use (typically less than $0.01 per digest). New accounts get free credits to start.
+
+---
+
+### Step 4 — Set Up Telegram (to receive your news)
+
+Telegram is a free messaging app. The bot will send your news digest directly to your Telegram.
+
+1. Download Telegram on your phone from the App Store or Google Play, or use [web.telegram.org](https://web.telegram.org)
+2. Create a Telegram account if you don't have one
+
+**Create your personal news bot:**
+1. Open Telegram and search for **@BotFather**
+2. Start a chat and send the message: `/newbot`
+3. It will ask for a name — type something like `My News Bot`
+4. It will ask for a username — type something like `mynewsbot_123` (must end in `bot`)
+5. BotFather will give you a **token** that looks like `123456789:ABCdef...` — **copy and save it**
+
+**Find your Chat ID:**
+1. Open Telegram and search for **@userinfobot**
+2. Start a chat and send `/start`
+3. It will reply with your **ID** (a number like `987654321`) — **copy and save it**
+
+---
+
+### Step 5 — Configure the Bot
+
+1. Open the `ai-news-bot` folder you downloaded
+2. Find the file called `.env.example` and **make a copy of it** named `.env` (just `.env`, no `.example`)
+3. Open `.env` in any text editor (Notepad on Windows, TextEdit on Mac)
+4. Fill in your details:
+
+```
+LLM_PROVIDER=claude
+ANTHROPIC_API_KEY=sk-ant-YOUR-KEY-HERE
+
+NOTIFICATION_METHODS=telegram
+TELEGRAM_BOT_TOKEN=YOUR-BOT-TOKEN-HERE
+TELEGRAM_CHAT_ID=YOUR-CHAT-ID-HERE
+```
+
+Replace `YOUR-KEY-HERE`, `YOUR-BOT-TOKEN-HERE`, and `YOUR-CHAT-ID-HERE` with the values you saved in Steps 3 and 4.
+
+---
+
+### Step 6 — Install Dependencies & Run
+
+**On Mac — open Terminal and run these one at a time:**
+```
+cd ~/Desktop/ai-news-bot
+pip3 install -r requirements.txt
+python3 main.py
+```
+
+**On Windows — open Command Prompt and run these one at a time:**
+```
+cd Desktop\ai-news-bot
+pip install -r requirements.txt
+python main.py
+```
+
+After the last command, wait about 30–60 seconds. You should receive a message in Telegram with today's news digest!
+
+---
+
+### Running on a Schedule (No Computer Needed)
+
+Once you've confirmed it works, you can run it automatically every day using GitHub — **for free** — without needing your computer to be on.
+
+See the [GitHub Actions Setup](#quick-start-github-actions--recommended) section below. You'll follow the same steps but enter your keys into GitHub's "Secrets" instead of a `.env` file.
+
+---
+
+### Common Questions
+
+**"I see a wall of text with errors"** — Look for the last line that says `Error:` and search that message in the [Troubleshooting](#troubleshooting) table below.
+
+**"I don't see `.env.example` in the folder"** — Your computer may be hiding files that start with a dot. On Mac, press `Command + Shift + .` in Finder to show hidden files. On Windows, in File Explorer go to View → Show → Hidden items.
+
+**"Where do I get a cheaper/free AI?"** — Set `LLM_PROVIDER=gemini` and get a free Google API key at [aistudio.google.com](https://aistudio.google.com/). Gemini has a generous free tier.
 
 ---
 
