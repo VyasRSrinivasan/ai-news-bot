@@ -3,11 +3,13 @@
 AI News Bot — Interactive Topic Search
 
 Usage:
-  python topic_search.py                   # prompts for topic interactively
+  python topic_search.py                   # prompts for news type, then topic
   python topic_search.py "electric vehicles"
   python topic_search.py technology --no-telegram
+  python topic_search.py --medical         # go straight to Medical News Channel
 """
 import argparse
+import os
 import sys
 from datetime import datetime
 
@@ -45,6 +47,32 @@ CATEGORIES = [
     ("6", "Robotics & EVs",      "autonomous vehicles, drones, industrial robots"),
     ("7", "Custom",              "enter your own topic"),
 ]
+
+
+def _prompt_news_type() -> str:
+    """Ask the user whether they want AI news or Medical news. Returns 'ai' or 'medical'."""
+    print()
+    print("┌─────────────────────────────────────────────────┐")
+    print("│           AI News Bot — News Type               │")
+    print("├────┬────────────────────────────────────────────┤")
+    print("│  1 │ AI & Technology News                       │")
+    print("│  2 │ Medical News                               │")
+    print("└────┴────────────────────────────────────────────┘")
+    print()
+
+    while True:
+        try:
+            choice = input("Select news type [1-2]: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nCancelled.")
+            sys.exit(130)
+
+        if choice == "1":
+            return "ai"
+        elif choice == "2":
+            return "medical"
+        else:
+            print("  Please enter 1 or 2.")
 
 
 def _prompt_category() -> str:
@@ -105,24 +133,43 @@ def main() -> int:
         action="store_true",
         help="Print digest to stdout instead of sending to Telegram.",
     )
+    parser.add_argument(
+        "--medical",
+        action="store_true",
+        help="Search medical news (cardiology, pulmonology, nephrology) and send to Medical News Channel.",
+    )
     args = parser.parse_args()
 
-    # ── Resolve topic ─────────────────────────────────────────────────────────
+    # ── Resolve topic & channel ────────────────────────────────────────────────
     preset_category: str | None = None
+    is_medical = False
+
     if args.topic:
         topic = " ".join(args.topic).strip()
-        # Check if the CLI arg exactly matches a preset category name
         matched = next((c for c in CATEGORIES if c[1].lower() == topic.lower()), None)
         if matched and matched[0] != "7":
             preset_category = matched[1]
             topic = matched[1]
+        if preset_category == "Health & Medicine" or args.medical:
+            is_medical = True
+    elif args.medical:
+        # --medical flag with no topic: use Health & Medicine feeds
+        is_medical = True
+        preset_category = "Health & Medicine"
+        topic = "cardiology pulmonology nephrology"
     else:
-        result = _prompt_category()
-        # _prompt_category returns the category name for presets, custom text for option 7
-        matched = next((c for c in CATEGORIES if c[1] == result and c[0] != "7"), None)
-        if matched:
-            preset_category = matched[1]
-        topic = result
+        # Interactive: ask news type first, then category
+        news_type = _prompt_news_type()
+        if news_type == "medical":
+            is_medical = True
+            preset_category = "Health & Medicine"
+            topic = "cardiology pulmonology nephrology"
+        else:
+            result = _prompt_category()
+            matched = next((c for c in CATEGORIES if c[1] == result and c[0] != "7"), None)
+            if matched:
+                preset_category = matched[1]
+            topic = result
 
     if not topic:
         print("Error: topic cannot be empty.", file=sys.stderr)
@@ -182,7 +229,20 @@ def main() -> int:
         _print_digest(digest)
         return 0
 
-    telegram = TelegramNotifier()
+    # Route to the correct Telegram channel
+    medical_chat_id = os.getenv("TELEGRAM_MEDICAL_CHAT_ID", "").strip()
+    medical_bot_token = os.getenv("TELEGRAM_MEDICAL_BOT_TOKEN", "").strip()
+    if is_medical and medical_chat_id:
+        telegram = TelegramNotifier(
+            bot_token=medical_bot_token or None,
+            chat_id=medical_chat_id,
+        )
+        print("Routing to Medical News Channel.")
+    else:
+        telegram = TelegramNotifier()
+        if is_medical:
+            print("Note: TELEGRAM_MEDICAL_CHAT_ID not set — falling back to AI News Channel.")
+
     if not telegram.bot_token or not telegram.chat_id:
         print(
             "Telegram not configured (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set).\n"

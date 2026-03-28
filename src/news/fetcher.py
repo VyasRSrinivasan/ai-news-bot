@@ -42,26 +42,27 @@ class NewsFetcher:
             "arXiv NLP": "https://rss.arxiv.org/rss/cs.CL",
 
             # Industry Verticals
-            "Healthcare IT News AI": "https://www.healthcareitnews.com/taxonomy/term/31/feed",
+            "Healthcare IT News AI": "https://www.healthcareitnews.com/rss.xml",
             "Robotics Business Review": "https://www.roboticsbusinessreview.com/feed/",
             "Autonomous Vehicle News": "https://www.autonomousvehicleinternational.com/feed",
 
             # Medical Specialties — Cardiology
             "Google News Cardiology": "https://news.google.com/rss/search?q=cardiology&hl=en-US&gl=US&ceid=US:en",
-            "JACC (Cardiology)": "https://www.jacc.org/rss/current",
-            "Circulation (AHA)": "https://www.ahajournals.org/action/showFeed?type=etoc&feed=rss&jc=circ",
+            "Google News Heart Disease": "https://news.google.com/rss/search?q=heart+disease+cardiac&hl=en-US&gl=US&ceid=US:en",
+            "AHA News": "https://newsroom.heart.org/feed",
 
             # Medical Specialties — Pulmonology
             "Google News Pulmonology": "https://news.google.com/rss/search?q=pulmonology+lung+disease&hl=en-US&gl=US&ceid=US:en",
-            "Chest Journal": "https://journal.chestnet.org/rss/current",
+            "Google News Respiratory": "https://news.google.com/rss/search?q=respiratory+disease+COPD+asthma&hl=en-US&gl=US&ceid=US:en",
 
             # Medical Specialties — Nephrology
             "Google News Nephrology": "https://news.google.com/rss/search?q=nephrology+kidney+disease&hl=en-US&gl=US&ceid=US:en",
-            "JASN (Nephrology)": "https://jasn.asnjournals.org/rss/current",
+            "Google News Kidney": "https://news.google.com/rss/search?q=chronic+kidney+disease+dialysis&hl=en-US&gl=US&ceid=US:en",
 
             # Broad Medical News
-            "NEJM": "https://www.nejm.org/action/showFeed?jc=nejm&type=etoc&feed=rss",
-            "The Lancet": "https://www.thelancet.com/rssfeed/lancet_current.xml",
+            "Google News Medical Research": "https://news.google.com/rss/search?q=medical+research+clinical+trial&hl=en-US&gl=US&ceid=US:en",
+            "MedPage Today": "https://www.medpagetoday.com/rss/headlines.xml",
+            "Medical News Today": "https://www.medicalnewstoday.com/rss",
 
             # Business & Finance
             "Reuters Business": "https://feeds.reuters.com/reuters/businessNews",
@@ -99,11 +100,10 @@ class NewsFetcher:
                 "Google AI Blog",
             ],
             "Health & Medicine": [
-                "Healthcare IT News AI",
-                "Google News Cardiology", "JACC (Cardiology)", "Circulation (AHA)",
-                "Google News Pulmonology", "Chest Journal",
-                "Google News Nephrology", "JASN (Nephrology)",
-                "NEJM", "The Lancet",
+                "Google News Cardiology", "Google News Heart Disease", "AHA News",
+                "Google News Pulmonology", "Google News Respiratory",
+                "Google News Nephrology", "Google News Kidney",
+                "Google News Medical Research", "MedPage Today", "Medical News Today",
             ],
             "Politics & Policy": [
                 "Wired AI", "MIT Technology Review", "Ars Technica AI",

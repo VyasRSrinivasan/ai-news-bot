@@ -140,10 +140,21 @@ class ClaudeProvider(BaseLLMProvider):
                 
                 # Check if Claude wants to use a tool
                 elif message.stop_reason == "tool_use":
-                    # Add assistant's response to messages
+                    # Convert SDK objects to plain dicts to avoid Pydantic serialization issues
+                    serialized_content = []
+                    for block in message.content:
+                        if block.type == "text":
+                            serialized_content.append({"type": "text", "text": block.text})
+                        elif block.type == "tool_use":
+                            serialized_content.append({
+                                "type": "tool_use",
+                                "id": block.id,
+                                "name": block.name,
+                                "input": block.input,
+                            })
                     messages.append({
                         "role": "assistant",
-                        "content": message.content
+                        "content": serialized_content,
                     })
                     
                     # Process tool calls

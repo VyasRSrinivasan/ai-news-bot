@@ -147,7 +147,7 @@ class Summarizer:
                 )
                 raw = self.provider.generate(
                     messages=messages,
-                    max_tokens=4096,
+                    max_tokens=8192,
                 )
                 digest = self._parse_json(raw)
                 logger.info("Summarizer: digest parsed successfully")

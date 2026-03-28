@@ -37,14 +37,17 @@
 ## Features
 
 - **Two Modes**: Run a scheduled daily digest *or* search for any topic on demand
-- **Agentic Topic Search**: Claude autonomously selects and fetches from 20+ RSS sources based on your prompt
-- **Interactive Category Menu**: Pick from preset categories (Technology, Finance, Science…) or enter a custom topic
+- **Agentic Topic Search**: Claude autonomously selects and fetches from curated RSS sources based on your topic
+- **Dual Telegram Channels**: Separate **AI News Channel** and **Medical News Channel** — each gets only relevant content
+- **Medical Specialty Coverage**: Dedicated feeds for Cardiology, Pulmonology, and Nephrology routed to a separate channel
+- **Category-Curated Feeds**: Each preset category (Technology, Business, Health…) maps to its own hand-picked RSS sources
+- **Interactive News Type Menu**: Choose AI & Technology or Medical News upfront — the bot routes to the right channel automatically
 - **Structured JSON Digest**: LLM returns categorized stories with importance ratings — not raw text
 - **Styled HTML Email**: Digest is rendered from structured JSON into a clean, mobile-friendly HTML email
 - **Telegram & Discord Short Summaries**: Concise embeds with headline + top stories per category
 - **Deduplication Memory**: `seen_urls.json` tracks sent articles across runs — no repeated stories
 - **Multi-Provider LLM Support**: Claude, DeepSeek, Gemini, Grok, or OpenAI
-- **20+ RSS Sources**: TechCrunch, VentureBeat, arXiv, OpenAI Blog, DeepMind, The Verge, and more
+- **30+ RSS Sources**: TechCrunch, VentureBeat, arXiv, OpenAI Blog, DeepMind, MedPage Today, AHA News, and more
 - **Multilingual Support**: Generate digests in 13+ languages
 - **Multiple Notification Channels**: Email (Gmail SMTP), Telegram, Discord, Slack, and Webhooks
 - **GitHub Actions Automation**: Daily cron job with automatic `seen_urls.json` commit
@@ -206,7 +209,7 @@ See the [GitHub Actions Setup](#quick-start-github-actions--recommended) section
 ### Scheduled Daily Digest (`main.py`)
 
 ```
-RSS Feeds (20+)
+RSS Feeds (30+)
      │
      ▼
 NewsFetcher.fetch_recent_news()
@@ -217,8 +220,9 @@ deduplicate_news_data()  ──► seen_urls.json (persisted)
      ▼
 Summarizer.summarize()  ──► JSON digest {date, headline, categories[]}
      │
-     ├──► EmailNotifier.send_digest()        → styled HTML email
-     ├──► TelegramNotifier.send_digest_summary() → short Telegram message
+     ├──► EmailNotifier.send_digest()            → styled HTML email
+     ├──► TelegramNotifier(TELEGRAM_CHAT_ID)     → AI News Channel
+     ├──► TelegramNotifier(TELEGRAM_MEDICAL_*)   → Medical News Channel (medical categories only)
      ├──► DiscordNotifier.send_digest_summary()  → Discord embed
      └──► SlackNotifier / WebhookNotifier        → text summary
 ```
@@ -226,12 +230,18 @@ Summarizer.summarize()  ──► JSON digest {date, headline, categories[]}
 ### Interactive Topic Search (`topic_search.py`)
 
 ```
-User selects category or enters custom topic
+User chooses: AI News (1) or Medical News (2)
+     │
+     ├── AI News ──► Category menu (Technology, Business, Science…)
+     │                    │
+     │               Curated feed subset for chosen category
+     │
+     └── Medical ──► Cardiology + Pulmonology + Nephrology feeds
      │
      ▼
 TopicNewsAgent  (Claude tool-calling loop)
-  │  Claude decides which RSS feeds are relevant
-  │  Calls fetch_rss_feed() for each → up to 20 sources
+  │  Claude fetches from the curated feed subset
+  │  Calls fetch_rss_feed() for each relevant source
      │
      ▼
 deduplicate_news()   (in-session dedup)
@@ -239,8 +249,8 @@ deduplicate_news()   (in-session dedup)
      ▼
 Summarizer.summarize(topics=[user_topic])
      │
-     ▼
-TelegramNotifier.send_digest_summary()
+     ├── AI News   ──► TelegramNotifier(TELEGRAM_CHAT_ID)
+     └── Medical   ──► TelegramNotifier(TELEGRAM_MEDICAL_CHAT_ID)
 ```
 
 ---
@@ -290,8 +300,10 @@ Repository → Settings → Secrets and variables → Actions → New repository
 
 | Secret | Example | Description |
 | --- | --- | --- |
-| `TELEGRAM_BOT_TOKEN` | `123456:ABC...` | Token from [@BotFather](https://t.me/botfather) |
-| `TELEGRAM_CHAT_ID` | `123456789` | Your chat ID ([@userinfobot](https://t.me/userinfobot)) |
+| `TELEGRAM_BOT_TOKEN` | `123456:ABC...` | Bot token for the AI News Channel ([@BotFather](https://t.me/botfather)) |
+| `TELEGRAM_CHAT_ID` | `123456789` | AI News Channel ID ([@userinfobot](https://t.me/userinfobot)) |
+| `TELEGRAM_MEDICAL_BOT_TOKEN` | `987654:XYZ...` | Bot token for the Medical News Channel (optional) |
+| `TELEGRAM_MEDICAL_CHAT_ID` | `-1001234567890` | Medical News Channel ID — starts with `-100` (optional) |
 
 #### 🎮 Discord (if using `discord`)
 
@@ -363,6 +375,10 @@ ANTHROPIC_API_KEY=sk-ant-...
 NOTIFICATION_METHODS=telegram
 TELEGRAM_BOT_TOKEN=123456:ABC...
 TELEGRAM_CHAT_ID=123456789
+
+# Optional: separate Medical News Channel
+TELEGRAM_MEDICAL_BOT_TOKEN=987654:XYZ...
+TELEGRAM_MEDICAL_CHAT_ID=-1001234567890
 ```
 
 ### 3. Run the Daily Digest
@@ -381,15 +397,18 @@ python topic_search.py
 
 ## Interactive Topic Search
 
-`topic_search.py` lets you search for news on **any topic right now** — no schedule required. Claude acts as an agent, selecting which of the 20+ RSS sources are relevant, fetching them, and publishing a digest to Telegram.
+`topic_search.py` lets you search for news on **any topic right now** — no schedule required. Claude acts as an agent, selecting from a curated feed set for your chosen category, and publishing a digest to the correct Telegram channel automatically.
 
 ### Usage
 
 ```bash
-# Interactive category menu (recommended)
+# Interactive menu — prompts for news type then category (recommended)
 python topic_search.py
 
-# Pass topic directly
+# Go straight to Medical News Channel
+python topic_search.py --medical
+
+# Pass a topic directly (routes to AI News Channel)
 python topic_search.py "electric vehicles"
 python topic_search.py "climate policy"
 
@@ -400,9 +419,28 @@ python topic_search.py technology --no-telegram
 python topic_search.py finance --max-sources 10
 ```
 
-### Category Menu
+### News Type Menu
 
-When run without arguments, the script displays a menu:
+When run without arguments, the script first asks which type of news you want:
+
+```
+┌─────────────────────────────────────────────────┐
+│           AI News Bot — News Type               │
+├────┬────────────────────────────────────────────┤
+│  1 │ AI & Technology News                       │
+│  2 │ Medical News                               │
+│    │ (Cardiology, Pulmonology, Nephrology)      │
+└────┴────────────────────────────────────────────┘
+
+Select news type [1-2]:
+```
+
+- **Option 1** → shows the category menu below, sends to **AI News Channel**
+- **Option 2** → fetches cardiology/pulmonology/nephrology feeds, sends to **Medical News Channel**
+
+### Category Menu (AI News)
+
+After selecting AI & Technology News, you choose a category:
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -416,21 +454,27 @@ When run without arguments, the script displays a menu:
 │  6 │ Robotics & EVs         │ autonomous, ...    │
 │  7 │ Custom                 │ enter your own...  │
 └────┴────────────────────────┴───────────────────┘
-
-Select a category [1-7]:
 ```
 
-Options 1–6 map to a preset topic string. Option 7 prompts for free text.
+Each preset category uses a **hand-picked set of RSS feeds** relevant to that topic:
+
+| Category | Key Sources |
+| --- | --- |
+| Technology | TechCrunch, Verge, Wired, OpenAI/Google/Meta/DeepMind blogs |
+| Business & Finance | Reuters, CNBC, Bloomberg, VentureBeat |
+| Science & Research | arXiv (AI, ML, CV, NLP), MIT Technology Review |
+| Health & Medicine | Google News (Cardiology/Pulmonology/Nephrology), MedPage Today, AHA News |
+| Politics & Policy | Politico, The Hill, Wired, MIT Technology Review |
+| Robotics & EVs | Robotics Business Review, Electrek, IEEE Spectrum |
 
 ### How the Agent Works
 
-1. Claude is given the user's topic and the full list of 20+ available RSS feeds.
-2. Claude calls `fetch_rss_feed(url)` for each source it deems relevant — autonomously deciding which feeds match the topic.
-3. Articles are collected as each tool call completes.
-4. After all relevant feeds are fetched, the articles are deduplicated and passed to `Summarizer`.
-5. The resulting JSON digest is sent to Telegram via `send_digest_summary()`.
+1. The curated feed list for the selected category is shown to Claude.
+2. Claude calls `fetch_rss_feed(url)` for each relevant source — up to 20 feeds.
+3. Articles are collected, deduplicated, and passed to `Summarizer`.
+4. The digest is sent to the appropriate Telegram channel based on news type.
 
-For non-Claude providers (or if tool-calling fails), the agent falls back to keyword filtering across all feeds.
+For non-Claude providers (or if tool-calling fails), the agent falls back to keyword filtering across the curated feeds.
 
 ---
 
@@ -495,6 +539,9 @@ news:
     - AI Research
     - AI Products & Startups
     - AI Policy & Regulation
+    - Cardiology
+    - Pulmonology
+    - Nephrology
 
   # Two-stage prompt templates (stage1 = selection, stage2 = summarization)
   stage1_prompt_template: |
@@ -523,8 +570,10 @@ logging:
 | `GMAIL_ADDRESS` | Email only | Your Gmail address |
 | `GMAIL_APP_PASSWORD` | Email only | 16-char Gmail App Password |
 | `EMAIL_TO` | Email only | Recipient address |
-| `TELEGRAM_BOT_TOKEN` | Telegram only | Bot token from @BotFather |
-| `TELEGRAM_CHAT_ID` | Telegram only | User, group, or channel ID |
+| `TELEGRAM_BOT_TOKEN` | Telegram only | Bot token for AI News Channel (from @BotFather) |
+| `TELEGRAM_CHAT_ID` | Telegram only | AI News Channel — user, group, or channel ID |
+| `TELEGRAM_MEDICAL_BOT_TOKEN` | Optional | Bot token for Medical News Channel |
+| `TELEGRAM_MEDICAL_CHAT_ID` | Optional | Medical News Channel ID (starts with `-100` for channels) |
 | `DISCORD_WEBHOOK_URL` | Discord only | Discord Webhook URL |
 | `SLACK_WEBHOOK_URL` | Slack only | Slack Incoming Webhook URL |
 | `WEBHOOK_URL` | Webhook only | Generic JSON webhook endpoint |
@@ -610,11 +659,29 @@ NOTIFICATION_METHODS=email
 
 ### Telegram
 
-1. Message [@BotFather](https://t.me/botfather) → `/newbot` → copy the token
-2. Message [@userinfobot](https://t.me/userinfobot) → copy your chat ID
-3. Set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` in `.env` or GitHub Secrets
+The bot supports two separate Telegram channels — one for AI news and one for medical news.
 
-For channels/groups: add the bot as admin and use the channel/group ID (starts with `-100`).
+**AI News Channel (required):**
+1. Message [@BotFather](https://t.me/botfather) → `/newbot` → copy the token
+2. Get your chat ID from [@userinfobot](https://t.me/userinfobot)
+3. Set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
+
+**Medical News Channel (optional):**
+1. Create a second bot via [@BotFather](https://t.me/botfather) → `/newbot` → copy its token
+2. Create a Telegram channel, add the bot as **Admin**
+3. Forward any message from that channel to [@userinfobot](https://t.me/userinfobot) to get its ID (starts with `-100`)
+4. Set `TELEGRAM_MEDICAL_BOT_TOKEN` and `TELEGRAM_MEDICAL_CHAT_ID`
+
+> **Tip:** You can reuse the same bot token for both channels — just add it as admin to both and set `TELEGRAM_MEDICAL_BOT_TOKEN` to the same value as `TELEGRAM_BOT_TOKEN`.
+
+**Channel routing:**
+
+| Trigger | AI News Channel | Medical News Channel |
+| --- | --- | --- |
+| `python main.py` | Full daily digest | Medical categories only |
+| `python topic_search.py` → option 1 (AI) | Chosen category digest | — |
+| `python topic_search.py` → option 2 (Medical) | — | Cardiology/Pulmonology/Nephrology digest |
+| `python topic_search.py --medical` | — | Medical digest |
 
 ### Discord
 
@@ -675,6 +742,8 @@ echo "[]" > seen_urls.json
 | `No new articles after deduplication` | Clear `seen_urls.json` (`echo "[]" > seen_urls.json`) |
 | Email not sending | Use the 16-char App Password, not your Gmail password |
 | Telegram not sending | Verify `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are correct |
+| Medical channel not receiving | Ensure `TELEGRAM_MEDICAL_CHAT_ID` is set and the medical bot is an Admin in that channel |
+| Medical channel falls back to AI channel | `TELEGRAM_MEDICAL_CHAT_ID` is blank — fill it in `.env` to enable the medical channel |
 | Agent fetches 0 articles | Check RSS feed connectivity; fallback keyword mode should activate |
 | `ModuleNotFoundError` | Run `pip install -r requirements.txt` |
 

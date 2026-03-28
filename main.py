@@ -4,6 +4,7 @@ AI News Bot - Main Application
 
 Pipeline: Fetch RSS → Deduplicate (seen_urls.json) → Summarize (JSON) → Deliver
 """
+import os
 import sys
 from datetime import datetime
 from src.config import Config
@@ -18,6 +19,27 @@ from src.notifiers import (
     TelegramNotifier,
     DiscordNotifier,
 )
+
+
+_MEDICAL_KEYWORDS = {
+    "cardiology", "pulmonology", "nephrology", "health", "medicine",
+    "medical", "biomedical", "healthcare", "clinical", "pharma",
+    "biotech", "kidney", "heart", "lung", "cardiac", "oncology", "psychiatry",
+}
+
+
+def _is_medical_category(name: str) -> bool:
+    """Return True if a category name contains any medical keyword."""
+    lower = name.lower()
+    return any(kw in lower for kw in _MEDICAL_KEYWORDS)
+
+
+def _medical_digest(digest: dict) -> dict | None:
+    """Return a copy of *digest* containing only medical categories, or None if none found."""
+    medical_cats = [c for c in digest.get("categories", []) if _is_medical_category(c.get("name", ""))]
+    if not medical_cats:
+        return None
+    return {**digest, "categories": medical_cats}
 
 
 def _digest_to_text(digest: dict) -> str:
@@ -129,6 +151,19 @@ def main():
                         lang_results["sent"].append("telegram")
                     else:
                         lang_results["failed"].append("telegram")
+
+                    # Send medical categories to Medical News Channel if configured
+                    medical_chat_id = os.getenv("TELEGRAM_MEDICAL_CHAT_ID", "").strip()
+                    medical_bot_token = os.getenv("TELEGRAM_MEDICAL_BOT_TOKEN", "").strip()
+                    if medical_chat_id:
+                        med_digest = _medical_digest(digest)
+                        if med_digest:
+                            logger.info("Sending medical digest to Medical News Channel...")
+                            medical_notifier = TelegramNotifier(
+                                bot_token=medical_bot_token or None,
+                                chat_id=medical_chat_id,
+                            )
+                            medical_notifier.send_digest_summary(med_digest, language=language)
 
                 if "discord" in notification_methods:
                     logger.info(f"Sending Discord summary ({language.upper()})...")
