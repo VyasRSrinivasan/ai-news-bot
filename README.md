@@ -33,7 +33,7 @@
 
 | [🟢 Beginner's Guide](#-beginners-guide--start-here-if-youre-new) | [✨ Features](#features) | [🚀 Quick Start](#quick-start-github-actions--recommended) | [🔍 Topic Search](#interactive-topic-search) |
 | :---------------------------------------------------------------: | :---------------------: | :---------------------------------------------------------: | :------------------------------------------: |
-| [⚙️ Configuration](#configuration) | [🤖 LLM Providers](#llm-provider-configuration) | [📧 Email Setup](#email-setup-guide) | [🔧 Troubleshooting](#troubleshooting) |
+| [⏰ Scheduler](#scheduler) | [⚙️ Configuration](#configuration) | [📧 Email Setup](#email-setup-guide) | [🔧 Troubleshooting](#troubleshooting) |
 
 </div>
 
@@ -45,8 +45,8 @@ Subscribe to receive automated digests directly in Telegram — no setup require
 
 | Channel | Topics | Link |
 | --- | --- | --- |
-| AI News Channel | Technology · Business · Science · Policy · Robotics | [t.me/ainewsbot01](https://t.me/ainewsbot01) |
-| Medical News Channel | Cardiology · Pulmonology · Nephrology · Pediatrics | [t.me/medicalnewsbot01](https://t.me/medicalnewsbot01) |
+| **AI News Channel** | Technology · Business & Finance · Science & Research · Politics & Policy · Robotics & EVs | [t.me/ainewsbot01](https://t.me/ainewsbot01) |
+| **Medical News Channel** | Cardiology · Pulmonology · Nephrology · Pediatrics · Endocrinology · Psychiatry · Oncology · AI in Medicine | [t.me/medicalnewsbot01](https://t.me/medicalnewsbot01) |
 
 > Want to run your own channels? Follow the [setup guide below](#notification-channels-setup) to deploy this bot for any topic.
 
@@ -57,7 +57,7 @@ Subscribe to receive automated digests directly in Telegram — no setup require
 - **Two Modes**: Run a scheduled daily digest *or* search for any topic on demand
 - **Agentic Topic Search**: Claude autonomously selects and fetches from curated RSS sources based on your topic
 - **Dual Telegram Channels**: Separate **AI News Channel** and **Medical News Channel** — each gets only relevant content
-- **Medical Specialty Coverage**: Dedicated feeds for Cardiology, Pulmonology, and Nephrology routed to a separate channel
+- **Medical Specialty Coverage**: Dedicated feeds for Cardiology, Pulmonology, Nephrology, Pediatrics, Endocrinology, Psychiatry, Oncology, and AI in Medicine — routed to a separate channel
 - **Category-Curated Feeds**: Each preset category (Technology, Business, Health…) maps to its own hand-picked RSS sources
 - **Interactive News Type Menu**: Choose AI & Technology or Medical News upfront — the bot routes to the right channel automatically
 - **Structured JSON Digest**: LLM returns categorized stories with importance ratings — not raw text
@@ -65,7 +65,7 @@ Subscribe to receive automated digests directly in Telegram — no setup require
 - **Telegram & Discord Short Summaries**: Concise embeds with headline + top stories per category
 - **Deduplication Memory**: `seen_urls.json` tracks sent articles across runs — no repeated stories
 - **Multi-Provider LLM Support**: Claude, DeepSeek, Gemini, Grok, or OpenAI
-- **30+ RSS Sources**: TechCrunch, VentureBeat, arXiv, OpenAI Blog, DeepMind, MedPage Today, AHA News, and more
+- **50+ RSS Sources**: TechCrunch, VentureBeat, arXiv, OpenAI Blog, DeepMind, MedPage Today, AHA News, Google News specialty feeds, and more
 - **Multilingual Support**: Generate digests in 13+ languages
 - **Multiple Notification Channels**: Email (Gmail SMTP), Telegram, Discord, Slack, and Webhooks
 - **GitHub Actions Automation**: Daily cron job with automatic `seen_urls.json` commit
@@ -227,7 +227,7 @@ See the [GitHub Actions Setup](#quick-start-github-actions--recommended) section
 ### Scheduled Daily Digest (`main.py`)
 
 ```
-RSS Feeds (30+)
+RSS Feeds (50+)
      │
      ▼
 NewsFetcher.fetch_recent_news()
@@ -254,7 +254,7 @@ User chooses: AI News (1) or Medical News (2)
      │                    │
      │               Curated feed subset for chosen category
      │
-     └── Medical ──► Cardiology + Pulmonology + Nephrology feeds
+     └── Medical ──► Specialty submenu → curated feeds for chosen specialty
      │
      ▼
 TopicNewsAgent  (Claude tool-calling loop)
@@ -278,7 +278,8 @@ Summarizer.summarize(topics=[user_topic])
 | Method | Configuration | When to Use |
 | --- | --- | --- |
 | **GitHub Actions** | Repository Secrets | Automated daily digest (recommended) |
-| **Local — Daily** | `.env` file | Manual runs of the full digest |
+| **Local — Scheduler** | `.env` file | Daily digest on a local machine/server |
+| **Local — Daily** | `.env` file | Manual single run of the full digest |
 | **Local — Topic Search** | `.env` file | On-demand search for any topic |
 
 ---
@@ -447,14 +448,16 @@ When run without arguments, the script first asks which type of news you want:
 ├────┬────────────────────────────────────────────┤
 │  1 │ AI & Technology News                       │
 │  2 │ Medical News                               │
-│    │ (Cardiology, Pulmonology, Nephrology)      │
+│    │ Cardiology · Pulmonology · Nephrology      │
+│    │ Pediatrics · Endocrinology · Psychiatry    │
+│    │ Oncology · AI in Medicine                  │
 └────┴────────────────────────────────────────────┘
 
 Select news type [1-2]:
 ```
 
 - **Option 1** → shows the category menu below, sends to **AI News Channel**
-- **Option 2** → fetches cardiology/pulmonology/nephrology feeds, sends to **Medical News Channel**
+- **Option 2** → shows the medical specialty submenu below, sends to **Medical News Channel**
 
 ### Category Menu (AI News)
 
@@ -470,7 +473,8 @@ After selecting AI & Technology News, you choose a category:
 │  4 │ Health & Medicine      │ biotech, pharma... │
 │  5 │ Politics & Policy      │ regulation, ...    │
 │  6 │ Robotics & EVs         │ autonomous, ...    │
-│  7 │ Custom                 │ enter your own...  │
+│  7 │ All Categories         │ all topics combined│
+│  8 │ Custom                 │ enter your own...  │
 └────┴────────────────────────┴───────────────────┘
 ```
 
@@ -481,9 +485,31 @@ Each preset category uses a **hand-picked set of RSS feeds** relevant to that to
 | Technology | TechCrunch, Verge, Wired, OpenAI/Google/Meta/DeepMind blogs |
 | Business & Finance | Reuters, CNBC, Bloomberg, VentureBeat |
 | Science & Research | arXiv (AI, ML, CV, NLP), MIT Technology Review |
-| Health & Medicine | Google News (Cardiology/Pulmonology/Nephrology), MedPage Today, AHA News |
+| Health & Medicine | Google News (Cardiology/Pulmonology/Nephrology/Pediatrics/Endocrinology/Psychiatry/Oncology/AI Medicine), MedPage Today, AHA News, Medical News Today |
 | Politics & Policy | Politico, The Hill, Wired, MIT Technology Review |
 | Robotics & EVs | Robotics Business Review, Electrek, IEEE Spectrum |
+
+### Medical Specialty Submenu
+
+After selecting Medical News, you choose a specialty:
+
+```
+┌─────────────────────────────────────────────────┐
+│       Medical News — Specialty Selection        │
+├────┬────────────────────────┬───────────────────┤
+│  1 │ Cardiology             │ heart disease, ... │
+│  2 │ Pulmonology            │ lung disease, ...  │
+│  3 │ Nephrology             │ kidney disease,... │
+│  4 │ Pediatrics             │ child health, ...  │
+│  5 │ Endocrinology          │ diabetes, thyroid  │
+│  6 │ Psychiatry             │ mental health, ... │
+│  7 │ Oncology               │ cancer, immuno...  │
+│  8 │ AI in Medicine         │ medical AI, ...    │
+│  9 │ All Specialties        │ all of the above   │
+└────┴────────────────────────┴───────────────────┘
+```
+
+Each specialty maps to a focused set of Google News RSS feeds and curated medical sources. The digest is sent to the **Medical News Channel**.
 
 ### How the Agent Works
 
@@ -493,6 +519,41 @@ Each preset category uses a **hand-picked set of RSS feeds** relevant to that to
 4. The digest is sent to the appropriate Telegram channel based on news type.
 
 For non-Claude providers (or if tool-calling fails), the agent falls back to keyword filtering across the curated feeds.
+
+---
+
+## Scheduler
+
+`scheduler.py` runs the daily digest and/or medical news search automatically at configured times — no GitHub Actions required. Useful when you want to keep the bot running on a local machine or server.
+
+### Usage
+
+```bash
+# Schedule both channels (reads times from .env)
+python scheduler.py
+
+# Schedule AI digest at 7:00 AM daily
+python scheduler.py --ai-time 07:00
+
+# Schedule Medical news at 8:00 AM daily
+python scheduler.py --medical-time 08:00
+
+# Schedule both
+python scheduler.py --ai-time 07:00 --medical-time 08:00
+
+# Fire immediately on startup, then continue on schedule
+python scheduler.py --ai-time 07:00 --run-now
+```
+
+### `.env` Configuration
+
+```env
+# Times for the local scheduler (HH:MM, 24-hour format)
+SCHEDULE_AI_TIME=07:00
+SCHEDULE_MEDICAL_TIME=08:00
+```
+
+> **Note:** The scheduler runs in the foreground. Keep the terminal open (or use a tool like `screen`, `tmux`, or `nohup`) to keep it running.
 
 ---
 
@@ -528,6 +589,7 @@ ai-news-bot/
 │       └── webhook_notifier.py     # Generic JSON webhook
 ├── main.py                         # Daily digest orchestrator
 ├── topic_search.py                 # Interactive topic search CLI
+├── scheduler.py                    # Local scheduler (runs at configured HH:MM times)
 ├── config.yaml                     # LLM, news topics, prompt templates
 ├── seen_urls.json                  # Persisted deduplication log (auto-updated)
 ├── requirements.txt
@@ -560,6 +622,11 @@ news:
     - Cardiology
     - Pulmonology
     - Nephrology
+    - Pediatrics
+    - Endocrinology
+    - Psychiatry
+    - Oncology
+    - AI in Medicine
 
   # Two-stage prompt templates (stage1 = selection, stage2 = summarization)
   stage1_prompt_template: |
@@ -679,12 +746,17 @@ NOTIFICATION_METHODS=email
 
 The bot supports two separate Telegram channels — one for AI news and one for medical news.
 
-**AI News Channel (required):**
+| Channel | Link |
+| --- | --- |
+| AI News Channel | [t.me/ainewsbot01](https://t.me/ainewsbot01) |
+| Medical News Channel | [t.me/medicalnewsbot01](https://t.me/medicalnewsbot01) |
+
+**To set up your own AI News Channel:**
 1. Message [@BotFather](https://t.me/botfather) → `/newbot` → copy the token
 2. Get your chat ID from [@userinfobot](https://t.me/userinfobot)
 3. Set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
 
-**Medical News Channel (optional):**
+**To set up your own Medical News Channel:**
 1. Create a second bot via [@BotFather](https://t.me/botfather) → `/newbot` → copy its token
 2. Create a Telegram channel, add the bot as **Admin**
 3. Forward any message from that channel to [@userinfobot](https://t.me/userinfobot) to get its ID (starts with `-100`)
@@ -698,7 +770,7 @@ The bot supports two separate Telegram channels — one for AI news and one for 
 | --- | --- | --- |
 | `python main.py` | Full daily digest | Medical categories only |
 | `python topic_search.py` → option 1 (AI) | Chosen category digest | — |
-| `python topic_search.py` → option 2 (Medical) | — | Cardiology/Pulmonology/Nephrology digest |
+| `python topic_search.py` → option 2 (Medical) | — | Choose specialty → sent to Medical Channel |
 | `python topic_search.py --medical` | — | Medical digest |
 
 ### Discord
