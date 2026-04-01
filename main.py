@@ -22,9 +22,11 @@ from src.notifiers import (
 
 
 _MEDICAL_KEYWORDS = {
-    "cardiology", "pulmonology", "nephrology", "health", "medicine",
-    "medical", "biomedical", "healthcare", "clinical", "pharma",
-    "biotech", "kidney", "heart", "lung", "cardiac", "oncology", "psychiatry",
+    "cardiology", "pulmonology", "nephrology", "pediatrics", "endocrinology",
+    "psychiatry", "oncology", "health", "medicine", "medical", "biomedical",
+    "healthcare", "clinical", "pharma", "biotech", "kidney", "heart", "lung",
+    "cardiac", "pediatric", "children", "diabetes", "thyroid", "mental health",
+    "psychiatric", "metabolic", "cancer", "tumor", "ai in medicine", "medical ai",
 }
 
 

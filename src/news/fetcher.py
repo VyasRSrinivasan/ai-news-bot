@@ -59,6 +59,26 @@ class NewsFetcher:
             "Google News Nephrology": "https://news.google.com/rss/search?q=nephrology+kidney+disease&hl=en-US&gl=US&ceid=US:en",
             "Google News Kidney": "https://news.google.com/rss/search?q=chronic+kidney+disease+dialysis&hl=en-US&gl=US&ceid=US:en",
 
+            # Medical Specialties — Pediatrics
+            "Google News Pediatrics": "https://news.google.com/rss/search?q=pediatrics+children+health&hl=en-US&gl=US&ceid=US:en",
+            "Google News Child Health": "https://news.google.com/rss/search?q=child+health+pediatric+medicine&hl=en-US&gl=US&ceid=US:en",
+
+            # Medical Specialties — Endocrinology
+            "Google News Endocrinology": "https://news.google.com/rss/search?q=endocrinology+diabetes+thyroid&hl=en-US&gl=US&ceid=US:en",
+            "Google News Diabetes": "https://news.google.com/rss/search?q=diabetes+insulin+metabolic+disease&hl=en-US&gl=US&ceid=US:en",
+
+            # Medical Specialties — Psychiatry
+            "Google News Psychiatry": "https://news.google.com/rss/search?q=psychiatry+mental+health+treatment&hl=en-US&gl=US&ceid=US:en",
+            "Google News Mental Health": "https://news.google.com/rss/search?q=mental+health+depression+anxiety&hl=en-US&gl=US&ceid=US:en",
+
+            # Medical Specialties — Oncology
+            "Google News Oncology": "https://news.google.com/rss/search?q=oncology+cancer+treatment&hl=en-US&gl=US&ceid=US:en",
+            "Google News Cancer Research": "https://news.google.com/rss/search?q=cancer+research+immunotherapy+chemotherapy&hl=en-US&gl=US&ceid=US:en",
+
+            # AI in Medicine
+            "Google News AI Medicine": "https://news.google.com/rss/search?q=artificial+intelligence+medicine+healthcare&hl=en-US&gl=US&ceid=US:en",
+            "Google News Medical AI": "https://news.google.com/rss/search?q=AI+diagnostics+clinical+AI+medical+imaging&hl=en-US&gl=US&ceid=US:en",
+
             # Broad Medical News
             "Google News Medical Research": "https://news.google.com/rss/search?q=medical+research+clinical+trial&hl=en-US&gl=US&ceid=US:en",
             "MedPage Today": "https://www.medpagetoday.com/rss/headlines.xml",
@@ -103,6 +123,11 @@ class NewsFetcher:
                 "Google News Cardiology", "Google News Heart Disease", "AHA News",
                 "Google News Pulmonology", "Google News Respiratory",
                 "Google News Nephrology", "Google News Kidney",
+                "Google News Pediatrics", "Google News Child Health",
+                "Google News Endocrinology", "Google News Diabetes",
+                "Google News Psychiatry", "Google News Mental Health",
+                "Google News Oncology", "Google News Cancer Research",
+                "Google News AI Medicine", "Google News Medical AI",
                 "Google News Medical Research", "MedPage Today", "Medical News Today",
             ],
             "Politics & Policy": [
@@ -112,6 +137,24 @@ class NewsFetcher:
             "Robotics & EVs": [
                 "Robotics Business Review", "Autonomous Vehicle News",
                 "Electrek", "IEEE Spectrum", "Google News EVs", "The Verge AI",
+            ],
+            "All Categories": [
+                # Technology
+                "TechCrunch AI", "VentureBeat AI", "MIT Technology Review",
+                "Ars Technica AI", "Wired AI", "The Next Web", "The Verge AI",
+                "Engadget AI", "OpenAI Blog", "Google AI Blog", "DeepMind Blog",
+                "Meta AI Blog", "Microsoft AI Blog",
+                # Business & Finance
+                "Reuters Business", "CNBC Technology", "Google News Business",
+                "Bloomberg Technology",
+                # Science & Research
+                "arXiv AI", "arXiv Machine Learning", "arXiv Computer Vision",
+                "arXiv NLP",
+                # Politics & Policy
+                "Politico Tech", "The Hill Tech", "Google News AI Policy",
+                # Robotics & EVs
+                "Robotics Business Review", "Autonomous Vehicle News",
+                "Electrek", "IEEE Spectrum", "Google News EVs",
             ],
         }
 

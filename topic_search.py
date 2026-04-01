@@ -45,8 +45,61 @@ CATEGORIES = [
     ("4", "Health & Medicine",   "biotech, pharma, public health, medical AI"),
     ("5", "Politics & Policy",   "government, regulation, elections, geopolitics"),
     ("6", "Robotics & EVs",      "autonomous vehicles, drones, industrial robots"),
-    ("7", "Custom",              "enter your own topic"),
+    ("7", "All Categories",      "all topics combined"),
+    ("8", "Custom",              "enter your own topic"),
 ]
+
+MEDICAL_CATEGORIES = [
+    ("1", "Cardiology",      "heart disease, cardiac, arrhythmia"),
+    ("2", "Pulmonology",     "lung disease, COPD, asthma, respiratory"),
+    ("3", "Nephrology",      "kidney disease, dialysis, renal"),
+    ("4", "Pediatrics",      "child health, neonatal, vaccines"),
+    ("5", "Endocrinology",   "diabetes, thyroid, hormones, metabolic"),
+    ("6", "Psychiatry",      "mental health, depression, anxiety"),
+    ("7", "Oncology",        "cancer, immunotherapy, chemotherapy"),
+    ("8", "AI in Medicine",  "medical AI, diagnostics, imaging"),
+    ("9", "All Specialties", "all of the above"),
+]
+
+# Maps each medical category name to its focused search topic
+_MEDICAL_TOPIC_MAP = {
+    "Cardiology":      "cardiology heart disease cardiac",
+    "Pulmonology":     "pulmonology lung disease respiratory COPD asthma",
+    "Nephrology":      "nephrology kidney disease renal dialysis",
+    "Pediatrics":      "pediatrics child health pediatric medicine",
+    "Endocrinology":   "endocrinology diabetes thyroid metabolic disease",
+    "Psychiatry":      "psychiatry mental health depression anxiety",
+    "Oncology":        "oncology cancer treatment immunotherapy chemotherapy",
+    "AI in Medicine":  "artificial intelligence medicine healthcare AI diagnostics medical imaging",
+    "All Specialties": "cardiology pulmonology nephrology pediatrics endocrinology psychiatry oncology AI medicine",
+}
+
+
+def _prompt_medical_category() -> str:
+    """Show the medical specialty menu and return the chosen topic string."""
+    print()
+    print("┌─────────────────────────────────────────────────┐")
+    print("│       Medical News — Specialty Selection        │")
+    print("├────┬────────────────────────┬───────────────────┤")
+    for num, name, desc in MEDICAL_CATEGORIES:
+        print(f"│ {num:>2} │ {name:<22} │ {desc:<17} │")
+    print("└────┴────────────────────────┴───────────────────┘")
+    print()
+
+    while True:
+        try:
+            choice = input(f"Select a specialty [1-{len(MEDICAL_CATEGORIES)}]: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nCancelled.")
+            sys.exit(130)
+
+        match = next((c for c in MEDICAL_CATEGORIES if c[0] == choice), None)
+        if match is None:
+            print(f"  Please enter a number between 1 and {len(MEDICAL_CATEGORIES)}.")
+            continue
+
+        _, name, _ = match
+        return _MEDICAL_TOPIC_MAP[name]
 
 
 def _prompt_news_type() -> str:
@@ -57,6 +110,9 @@ def _prompt_news_type() -> str:
     print("├────┬────────────────────────────────────────────┤")
     print("│  1 │ AI & Technology News                       │")
     print("│  2 │ Medical News                               │")
+    print("│    │ Cardiology · Pulmonology · Nephrology      │")
+    print("│    │ Pediatrics · Endocrinology · Psychiatry    │")
+    print("│    │ Oncology · AI in Medicine                  │")
     print("└────┴────────────────────────────────────────────┘")
     print()
 
@@ -88,7 +144,7 @@ def _prompt_category() -> str:
 
     while True:
         try:
-            choice = input("Select a category [1-7]: ").strip()
+            choice = input("Select a category [1-8]: ").strip()
         except (EOFError, KeyboardInterrupt):
             print("\nCancelled.")
             sys.exit(130)
@@ -99,7 +155,7 @@ def _prompt_category() -> str:
             continue
 
         num, name, _ = match
-        if num == "7":
+        if num == "8":
             try:
                 custom = input("Enter your topic: ").strip()
             except (EOFError, KeyboardInterrupt):
@@ -136,7 +192,7 @@ def main() -> int:
     parser.add_argument(
         "--medical",
         action="store_true",
-        help="Search medical news (cardiology, pulmonology, nephrology) and send to Medical News Channel.",
+        help="Search medical news and send to Medical News Channel. Prompts for specialty selection.",
     )
     args = parser.parse_args()
 
@@ -156,14 +212,14 @@ def main() -> int:
         # --medical flag with no topic: use Health & Medicine feeds
         is_medical = True
         preset_category = "Health & Medicine"
-        topic = "cardiology pulmonology nephrology"
+        topic = "cardiology, pulmonology, nephrology, pediatrics"
     else:
         # Interactive: ask news type first, then category
         news_type = _prompt_news_type()
         if news_type == "medical":
             is_medical = True
             preset_category = "Health & Medicine"
-            topic = "cardiology pulmonology nephrology"
+            topic = _prompt_medical_category()
         else:
             result = _prompt_category()
             matched = next((c for c in CATEGORIES if c[1] == result and c[0] != "7"), None)

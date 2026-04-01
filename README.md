@@ -14,6 +14,11 @@
 [![Slack](https://img.shields.io/badge/Slack-Integration-00D4AA?style=flat-square)](https://slack.com/)
 [![Webhook](https://img.shields.io/badge/Webhook-Support-00D4AA?style=flat-square)](#)
 
+### 📲 Subscribe to Our Telegram Channels
+
+[![AI News](https://img.shields.io/badge/Telegram-AI_News_Channel-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/ainewsbot01)
+[![Medical News](https://img.shields.io/badge/Telegram-Medical_News_Channel-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/medicalnewsbot01)
+
 [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-Automation-2088FF?style=flat-square&logo=github-actions&logoColor=white)](https://github.com/giftedunicorn/ai-news-bot)
 [![Claude](https://img.shields.io/badge/Claude-Sonnet_4.5-FF6B6B?style=flat-square&logo=anthropic&logoColor=white)](https://www.anthropic.com)
 [![DeepSeek](https://img.shields.io/badge/DeepSeek-Supported-4285F4?style=flat-square&logo=ai&logoColor=white)](https://www.deepseek.com)
@@ -31,6 +36,19 @@
 | [⚙️ Configuration](#configuration) | [🤖 LLM Providers](#llm-provider-configuration) | [📧 Email Setup](#email-setup-guide) | [🔧 Troubleshooting](#troubleshooting) |
 
 </div>
+
+---
+
+## 📲 Telegram Channels
+
+Subscribe to receive automated digests directly in Telegram — no setup required.
+
+| Channel | Topics | Link |
+| --- | --- | --- |
+| AI News Channel | Technology · Business · Science · Policy · Robotics | [t.me/ainewsbot01](https://t.me/ainewsbot01) |
+| Medical News Channel | Cardiology · Pulmonology · Nephrology · Pediatrics | [t.me/medicalnewsbot01](https://t.me/medicalnewsbot01) |
+
+> Want to run your own channels? Follow the [setup guide below](#notification-channels-setup) to deploy this bot for any topic.
 
 ---
 

@@ -30,6 +30,11 @@ news:
     - Cardiology
     - Pulmonology
     - Nephrology
+    - Pediatrics
+    - Endocrinology
+    - Psychiatry
+    - Oncology
+    - AI in Medicine
 
   # Maximum news items to fetch per source (fetch more for AI to select from)
   max_items_per_source: 10
@@ -51,7 +56,7 @@ news:
       - ✅ Balanced coverage across categories (LLM, Agents, Research, Products, etc.)
       - ✅ Include both international and domestic news when available
       - ✅ Prefer primary sources over secondary reporting
-      - ✅ Include relevant articles on cardiology, pulmonology, and nephrology
+      - ✅ Include relevant articles on cardiology, pulmonology, nephrology, pediatrics, endocrinology, psychiatry, oncology, and AI in medicine
 
       ### OUTPUT FORMAT:
       Return ONLY a JSON array of selected news IDs. No explanations, no markdown, just the JSON array.
