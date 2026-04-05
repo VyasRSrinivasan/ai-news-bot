@@ -94,6 +94,18 @@ _CHANNEL_ROUTING = [
             "copper mining", "battery materials",
         },
     },
+    {
+        "key": "psychology",
+        "title": "Psychology News",
+        "token_env": "TELEGRAM_PSYCHOLOGY_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_PSYCHOLOGY_CHAT_ID",
+        "keywords": {
+            "psychology", "psychological", "behavioral science", "behaviour", "behavior",
+            "neuroscience", "cognitive science", "cognition", "mental health research",
+            "psychotherapy", "psychologist", "emotional intelligence", "social psychology",
+            "developmental psychology", "neuropsychology", "mindfulness", "emotional maturity", "emotional immaturity"
+        },
+    },
 ]
 
 

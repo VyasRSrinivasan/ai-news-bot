@@ -77,6 +77,14 @@ _CHANNEL_CONFIGS = {
         "feeds_category": "Rare Earth",
         "topic": "rare earth minerals lithium cobalt mining critical minerals supply chain",
     },
+    "psychology": {
+        "key": "psychology",
+        "title": "Psychology News",
+        "token_env": "TELEGRAM_PSYCHOLOGY_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_PSYCHOLOGY_CHAT_ID",
+        "feeds_category": "Psychology",
+        "topic": "psychology behavioral science neuroscience cognitive science mental health research",
+    },
 }
 
 
@@ -193,8 +201,9 @@ def main() -> int:
     parser.add_argument("--genome-time",     type=_validate_time, default=os.getenv("SCHEDULE_GENOME_TIME", ""),     metavar="HH:MM", help="Time to send Genome Research daily.")
     parser.add_argument("--genetics-time",   type=_validate_time, default=os.getenv("SCHEDULE_GENETICS_TIME", ""),   metavar="HH:MM", help="Time to send Genetics Research daily.")
     parser.add_argument("--energy-time",     type=_validate_time, default=os.getenv("SCHEDULE_ENERGY_TIME", ""),     metavar="HH:MM", help="Time to send Energy News daily.")
-    parser.add_argument("--rare-earth-time", type=_validate_time, default=os.getenv("SCHEDULE_RARE_EARTH_TIME", ""), metavar="HH:MM", help="Time to send Rare Earth News daily.")
-    parser.add_argument("--run-now",         action="store_true",                                                                      help="Fire all scheduled jobs immediately on startup.")
+    parser.add_argument("--rare-earth-time", type=_validate_time, default=os.getenv("SCHEDULE_RARE_EARTH_TIME", ""),  metavar="HH:MM", help="Time to send Rare Earth News daily.")
+    parser.add_argument("--psychology-time", type=_validate_time, default=os.getenv("SCHEDULE_PSYCHOLOGY_TIME", ""), metavar="HH:MM", help="Time to send Psychology News daily.")
+    parser.add_argument("--run-now",         action="store_true",                                                                       help="Fire all scheduled jobs immediately on startup.")
     args = parser.parse_args()
 
     # Build list of (time, label, job_fn) for all enabled schedules
@@ -202,12 +211,13 @@ def main() -> int:
     if args.ai_time:
         scheduled.append((args.ai_time, "AI News digest", _run_ai_digest))
     for key, attr, label in [
-        ("medical",   "medical_time",    "Medical News"),
-        ("pharma",    "pharma_time",     "Pharmaceutical News"),
-        ("genome",    "genome_time",     "Genome Research"),
-        ("genetics",  "genetics_time",   "Genetics Research"),
-        ("energy",    "energy_time",     "Energy News"),
-        ("rare_earth","rare_earth_time", "Rare Earth News"),
+        ("medical",    "medical_time",    "Medical News"),
+        ("pharma",     "pharma_time",     "Pharmaceutical News"),
+        ("genome",     "genome_time",     "Genome Research"),
+        ("genetics",   "genetics_time",   "Genetics Research"),
+        ("energy",     "energy_time",     "Energy News"),
+        ("rare_earth", "rare_earth_time", "Rare Earth News"),
+        ("psychology", "psychology_time", "Psychology News"),
     ]:
         t = getattr(args, attr)
         if t:

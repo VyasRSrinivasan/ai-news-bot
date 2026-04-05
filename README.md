@@ -827,8 +827,14 @@ The bot supports 8 specialty Telegram channels — each receives only its releva
 
 | Channel | Link |
 | --- | --- |
-| AI News Channel | [t.me/ainewsbot01](https://t.me/ainewsbot01) |
-| Medical News Channel | [t.me/medicalnewsbot01](https://t.me/medicalnewsbot01) |
+| AI News | [t.me/ainewsbot01](https://t.me/ainewsbot01) |
+| Medical News | [t.me/medicalnewsbot01](https://t.me/medicalnewsbot01) |
+| Pharmaceutical Industry News | [t.me/pharmaceuticalindustrynewsbot01](https://t.me/pharmaceuticalindustrynewsbot01) |
+| Genome Research News | [t.me/genomenewsbot01](https://t.me/genomenewsbot01) |
+| Genetics Research News | [t.me/geneticsnewsbot01](https://t.me/geneticsnewsbot01) |
+| Energy News | [t.me/energynewsbot01](https://t.me/energynewsbot01) |
+| Rare Earth News | [t.me/rareearthnewsbot01](https://t.me/rareearthnewsbot01) |
+| Psychology News | [t.me/psychologynewsbot01](https://t.me/psychologynewsbot01) |
 
 **To set up your own channel:**
 1. Message [@BotFather](https://t.me/botfather) → `/newbot` → copy the token
