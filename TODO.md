@@ -408,8 +408,8 @@ class Config:
             errors.append("Slack enabled but SLACK_WEBHOOK_URL not set")
 
         if "telegram" in methods:
-            if not all([os.getenv("TELEGRAM_BOT_TOKEN"), os.getenv("TELEGRAM_CHAT_ID")]):
-                errors.append("Telegram enabled but missing TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID")
+            if not all([os.getenv("TELEGRAM_AI_BOT_TOKEN"), os.getenv("TELEGRAM_AI_CHAT_ID")]):
+                errors.append("Telegram enabled but missing TELEGRAM_AI_BOT_TOKEN or TELEGRAM_AI_CHAT_ID")
 
         if "discord" in methods and not os.getenv("DISCORD_WEBHOOK_URL"):
             errors.append("Discord enabled but DISCORD_WEBHOOK_URL not set")

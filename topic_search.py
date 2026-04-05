@@ -50,29 +50,154 @@ CATEGORIES = [
 ]
 
 MEDICAL_CATEGORIES = [
-    ("1", "Cardiology",      "heart disease, cardiac, arrhythmia"),
-    ("2", "Pulmonology",     "lung disease, COPD, asthma, respiratory"),
-    ("3", "Nephrology",      "kidney disease, dialysis, renal"),
-    ("4", "Pediatrics",      "child health, neonatal, vaccines"),
-    ("5", "Endocrinology",   "diabetes, thyroid, hormones, metabolic"),
-    ("6", "Psychiatry",      "mental health, depression, anxiety"),
-    ("7", "Oncology",        "cancer, immunotherapy, chemotherapy"),
-    ("8", "AI in Medicine",  "medical AI, diagnostics, imaging"),
-    ("9", "All Specialties", "all of the above"),
+    ("1",  "Cardiology",      "heart disease, cardiac, arrhythmia"),
+    ("2",  "Pulmonology",     "lung disease, COPD, asthma, respiratory"),
+    ("3",  "Nephrology",      "kidney disease, dialysis, renal"),
+    ("4",  "Pediatrics",      "child health, neonatal, vaccines"),
+    ("5",  "Endocrinology",   "thyroid, hormones, metabolic"),
+    ("6",  "Diabetes",        "diabetes, insulin, glucose, T1D, T2D"),
+    ("7",  "Psychiatry",      "mental health, depression, anxiety"),
+    ("8",  "Oncology",        "cancer, immunotherapy, chemotherapy"),
+    ("9",  "AI in Medicine",  "medical AI, diagnostics, imaging"),
+    ("10", "All Specialties", "all of the above"),
 ]
 
 # Maps each medical category name to its focused search topic
+# ── Specialty channel configuration (non-AI, non-Medical) ─────────────────────
+_SPECIALTY_CHANNELS = {
+    "pharma": {
+        "title": "Pharmaceutical News",
+        "token_env": "TELEGRAM_PHARMA_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_PHARMA_CHAT_ID",
+        "feeds_category": "Pharmaceutical",
+        "topic": "pharmaceutical drug discovery FDA clinical trial biotech biopharma drug approval",
+    },
+    "genome": {
+        "title": "Genome Research News",
+        "token_env": "TELEGRAM_GENOME_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_GENOME_CHAT_ID",
+        "feeds_category": "Genome Research",
+        "topic": "genomics genome sequencing CRISPR gene editing bioinformatics",
+    },
+    "genetics": {
+        "title": "Genetics Research News",
+        "token_env": "TELEGRAM_GENETICS_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_GENETICS_CHAT_ID",
+        "feeds_category": "Genetics Research",
+        "topic": "genetics gene therapy genetic disorder hereditary mutation chromosome",
+    },
+    "energy": {
+        "title": "Energy News",
+        "token_env": "TELEGRAM_ENERGY_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_ENERGY_CHAT_ID",
+        "feeds_category": "Energy",
+        "topic": "energy solar wind nuclear renewable battery grid clean energy hydrogen",
+    },
+    "rare_earth": {
+        "title": "Rare Earth News",
+        "token_env": "TELEGRAM_RARE_EARTH_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_RARE_EARTH_CHAT_ID",
+        "feeds_category": "Rare Earth",
+        "topic": "rare earth minerals lithium cobalt mining critical minerals supply chain",
+    },
+    "psychology": {
+        "title": "Psychology News",
+        "token_env": "TELEGRAM_PSYCHOLOGY_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_PSYCHOLOGY_CHAT_ID",
+        "feeds_category": "Psychology",
+        "topic": "psychology behavioral science neuroscience cognitive science mental health research",
+    },
+}
+
 _MEDICAL_TOPIC_MAP = {
     "Cardiology":      "cardiology heart disease cardiac",
     "Pulmonology":     "pulmonology lung disease respiratory COPD asthma",
     "Nephrology":      "nephrology kidney disease renal dialysis",
     "Pediatrics":      "pediatrics child health pediatric medicine",
-    "Endocrinology":   "endocrinology diabetes thyroid metabolic disease",
+    "Endocrinology":   "endocrinology thyroid metabolic disease hormones",
+    "Diabetes":        "diabetes insulin resistance glucose type 1 diabetes type 2 diabetes T1D T2D",
     "Psychiatry":      "psychiatry mental health depression anxiety",
     "Oncology":        "oncology cancer treatment immunotherapy chemotherapy",
     "AI in Medicine":  "artificial intelligence medicine healthcare AI diagnostics medical imaging",
-    "All Specialties": "cardiology pulmonology nephrology pediatrics endocrinology psychiatry oncology AI medicine",
+    "All Specialties": "cardiology pulmonology nephrology pediatrics endocrinology diabetes psychiatry oncology AI medicine",
 }
+
+
+# ── All-channels list (used by --all) ─────────────────────────────────────────
+_ALL_CHANNELS = [
+    {
+        "title": "AI News",
+        "token_env": "TELEGRAM_AI_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_AI_CHAT_ID",
+        "feeds_category": "All Categories",
+        "topic": "AI technology software machine learning",
+    },
+    {
+        "title": "Medical News",
+        "token_env": "TELEGRAM_MEDICAL_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_MEDICAL_CHAT_ID",
+        "feeds_category": "Health & Medicine",
+        "topic": "cardiology pulmonology nephrology pediatrics endocrinology diabetes psychiatry oncology AI medicine",
+    },
+    *_SPECIALTY_CHANNELS.values(),
+]
+
+
+def _run_single_channel(ch: dict, config, max_sources: int, no_telegram: bool, today: str) -> bool:
+    """Run the full fetch→summarize→deliver pipeline for one channel. Returns True on success."""
+    print(f"\n{'─' * 60}")
+    print(f"  Channel: {ch['title']}")
+    print(f"  Topic:   {ch['topic']}")
+    print(f"{'─' * 60}")
+
+    fetcher = NewsFetcher()
+    feeds = fetcher.get_feeds_for_category(ch["feeds_category"])
+    if feeds:
+        fetcher.rss_feeds = feeds
+        print(f"  Using {len(feeds)} curated sources for '{ch['feeds_category']}'.")
+
+    agent = TopicNewsAgent(
+        provider_name=config.llm_provider,
+        api_key=config.llm_api_key,
+        model=config.llm_model,
+        fetcher=fetcher,
+    )
+
+    print("  Fetching sources...")
+    articles = agent.collect(ch["topic"], max_sources=max_sources)
+    if not articles:
+        print(f"  No articles found — skipping {ch['title']}.", file=sys.stderr)
+        return False
+
+    articles = deduplicate_news(articles)
+    print(f"  {len(articles)} unique articles collected.")
+
+    summarizer = Summarizer(
+        provider_name=config.llm_provider,
+        api_key=config.llm_api_key,
+        model=config.llm_model,
+    )
+    digest = summarizer.summarize(articles, topics=[ch["topic"]], today=today)
+    print(f"  Headline: {digest.get('headline', '')}")
+
+    if no_telegram:
+        _print_digest(digest)
+        return True
+
+    chat_id = os.getenv(ch["chat_id_env"], "").strip()
+    bot_token = os.getenv(ch["token_env"], "").strip()
+
+    if not chat_id:
+        print(f"  {ch['chat_id_env']} not set — skipping Telegram send.")
+        return False
+
+    telegram = TelegramNotifier(bot_token=bot_token or None, chat_id=chat_id)
+    if telegram.send_digest_summary(digest, channel_title=ch["title"]):
+        print(f"  Sent to {ch['title']} Channel.")
+        return True
+    else:
+        print(f"  Failed to send to {ch['title']} Channel.")
+        return False
 
 
 def _prompt_medical_category() -> str:
@@ -103,7 +228,7 @@ def _prompt_medical_category() -> str:
 
 
 def _prompt_news_type() -> str:
-    """Ask the user whether they want AI news or Medical news. Returns 'ai' or 'medical'."""
+    """Show channel selection menu. Returns 'ai', 'medical', or a key from _SPECIALTY_CHANNELS."""
     print()
     print("┌─────────────────────────────────────────────────┐")
     print("│           AI News Bot — News Type               │")
@@ -111,24 +236,36 @@ def _prompt_news_type() -> str:
     print("│  1 │ AI & Technology News                       │")
     print("│  2 │ Medical News                               │")
     print("│    │ Cardiology · Pulmonology · Nephrology      │")
-    print("│    │ Pediatrics · Endocrinology · Psychiatry    │")
-    print("│    │ Oncology · AI in Medicine                  │")
+    print("│    │ Pediatrics · Endocrinology · Diabetes      │")
+    print("│    │ Psychiatry · Oncology · AI in Medicine     │")
+    print("│  3 │ Pharmaceutical News                        │")
+    print("│    │ Pharma · Biotech · FDA · Clinical Trials   │")
+    print("│  4 │ Genome Research News                       │")
+    print("│    │ Genomics · CRISPR · Sequencing             │")
+    print("│  5 │ Genetics Research News                     │")
+    print("│    │ Gene Therapy · Genetic Disorders           │")
+    print("│  6 │ Energy News                                │")
+    print("│    │ Solar · Wind · Nuclear · Battery · Grid    │")
+    print("│  7 │ Rare Earth News                            │")
+    print("│    │ Lithium · Cobalt · Mining · Critical Min.  │")
+    print("│  8 │ Psychology News                            │")
+    print("│    │ Behavioral Science · Neuroscience          │")
     print("└────┴────────────────────────────────────────────┘")
     print()
 
+    _map = {
+        "1": "ai", "2": "medical", "3": "pharma", "4": "genome",
+        "5": "genetics", "6": "energy", "7": "rare_earth", "8": "psychology",
+    }
     while True:
         try:
-            choice = input("Select news type [1-2]: ").strip()
+            choice = input("Select news type [1-8]: ").strip()
         except (EOFError, KeyboardInterrupt):
             print("\nCancelled.")
             sys.exit(130)
-
-        if choice == "1":
-            return "ai"
-        elif choice == "2":
-            return "medical"
-        else:
-            print("  Please enter 1 or 2.")
+        if choice in _map:
+            return _map[choice]
+        print("  Please enter a number between 1 and 8.")
 
 
 def _prompt_category() -> str:
@@ -194,11 +331,36 @@ def main() -> int:
         action="store_true",
         help="Search medical news and send to Medical News Channel. Prompts for specialty selection.",
     )
+    parser.add_argument(
+        "--all",
+        action="store_true",
+        help="Update all channels at once (AI, Medical, Pharma, Genome, Genetics, Energy, Rare Earth, Psychology).",
+    )
     args = parser.parse_args()
+
+    # ── --all: run every channel in sequence ──────────────────────────────────
+    if args.all:
+        config = Config()
+        setup_logger("topic_search", level=config.log_level, log_format=config.log_format)
+        today = datetime.now().strftime("%Y-%m-%d")
+        print(f"\nUpdating all {len(_ALL_CHANNELS)} channels...")
+        results = {"ok": [], "failed": []}
+        for ch in _ALL_CHANNELS:
+            ok = _run_single_channel(ch, config, args.max_sources, args.no_telegram, today)
+            (results["ok"] if ok else results["failed"]).append(ch["title"])
+        print(f"\n{'=' * 60}")
+        print(f"  Done.  Sent: {len(results['ok'])}  Failed: {len(results['failed'])}")
+        if results["ok"]:
+            print(f"  ✓ {', '.join(results['ok'])}")
+        if results["failed"]:
+            print(f"  ✗ {', '.join(results['failed'])}")
+        print(f"{'=' * 60}\n")
+        return 0 if not results["failed"] else 1
 
     # ── Resolve topic & channel ────────────────────────────────────────────────
     preset_category: str | None = None
     is_medical = False
+    specialty_ch: dict | None = None
 
     if args.topic:
         topic = " ".join(args.topic).strip()
@@ -209,23 +371,26 @@ def main() -> int:
         if preset_category == "Health & Medicine" or args.medical:
             is_medical = True
     elif args.medical:
-        # --medical flag with no topic: use Health & Medicine feeds
         is_medical = True
         preset_category = "Health & Medicine"
         topic = "cardiology, pulmonology, nephrology, pediatrics"
     else:
-        # Interactive: ask news type first, then category
+        # Interactive: ask news type first, then category/specialty
         news_type = _prompt_news_type()
         if news_type == "medical":
             is_medical = True
             preset_category = "Health & Medicine"
             topic = _prompt_medical_category()
-        else:
+        elif news_type == "ai":
             result = _prompt_category()
             matched = next((c for c in CATEGORIES if c[1] == result and c[0] != "7"), None)
             if matched:
                 preset_category = matched[1]
             topic = result
+        else:
+            specialty_ch = _SPECIALTY_CHANNELS[news_type]
+            preset_category = specialty_ch["feeds_category"]
+            topic = specialty_ch["topic"]
 
     if not topic:
         print("Error: topic cannot be empty.", file=sys.stderr)
@@ -233,7 +398,7 @@ def main() -> int:
 
     # ── Setup ─────────────────────────────────────────────────────────────────
     config = Config()
-    logger = setup_logger("topic_search", level=config.log_level, log_format=config.log_format)
+    setup_logger("topic_search", level=config.log_level, log_format=config.log_format)
     today = datetime.now().strftime("%Y-%m-%d")
 
     print(f"\nSearching for news about: {topic!r}")
@@ -286,29 +451,36 @@ def main() -> int:
         return 0
 
     # Route to the correct Telegram channel
-    medical_chat_id = os.getenv("TELEGRAM_MEDICAL_CHAT_ID", "").strip()
-    medical_bot_token = os.getenv("TELEGRAM_MEDICAL_BOT_TOKEN", "").strip()
-    if is_medical and medical_chat_id:
-        telegram = TelegramNotifier(
-            bot_token=medical_bot_token or None,
-            chat_id=medical_chat_id,
-        )
-        print("Routing to Medical News Channel.")
+    if is_medical:
+        ch_token_env, ch_chat_id_env = "TELEGRAM_MEDICAL_BOT_TOKEN", "TELEGRAM_MEDICAL_CHAT_ID"
+        channel_title = "Medical News"
+    elif specialty_ch:
+        ch_token_env, ch_chat_id_env = specialty_ch["token_env"], specialty_ch["chat_id_env"]
+        channel_title = specialty_ch["title"]
+    else:
+        ch_token_env, ch_chat_id_env = "TELEGRAM_AI_BOT_TOKEN", "TELEGRAM_AI_CHAT_ID"
+        channel_title = "AI News"
+
+    ch_chat_id = os.getenv(ch_chat_id_env, "").strip()
+    ch_bot_token = os.getenv(ch_token_env, "").strip()
+
+    if ch_chat_id:
+        telegram = TelegramNotifier(bot_token=ch_bot_token or None, chat_id=ch_chat_id)
+        print(f"Routing to {channel_title} Channel.")
     else:
         telegram = TelegramNotifier()
-        if is_medical:
-            print("Note: TELEGRAM_MEDICAL_CHAT_ID not set — falling back to AI News Channel.")
+        print(f"Note: {ch_chat_id_env} not set — falling back to AI News Channel.")
 
     if not telegram.bot_token or not telegram.chat_id:
         print(
-            "Telegram not configured (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set).\n"
+            f"Telegram not configured ({ch_token_env} / {ch_chat_id_env} not set).\n"
             "Printing digest instead:\n"
         )
         _print_digest(digest)
         return 0
 
     print("Sending digest to Telegram...")
-    if telegram.send_digest_summary(digest):
+    if telegram.send_digest_summary(digest, channel_title=channel_title):
         print("Sent successfully!")
         return 0
     else:

@@ -2,14 +2,18 @@
 """
 AI News Bot — Scheduler
 
-Runs the daily digest and/or medical news search automatically at configured times.
+Runs the daily digest and/or specialty channel searches automatically at configured times.
 
 Usage:
-  python scheduler.py                               # uses times from .env
-  python scheduler.py --ai-time 07:00              # AI digest at 7:00 AM daily
-  python scheduler.py --medical-time 08:00         # Medical news at 8:00 AM daily
-  python scheduler.py --ai-time 07:00 --medical-time 08:00   # both
-  python scheduler.py --ai-time 07:00 --run-now    # also fire immediately on start
+  python scheduler.py                                    # uses times from .env
+  python scheduler.py --ai-time 07:00                   # AI digest at 7:00 AM daily
+  python scheduler.py --medical-time 08:00              # Medical news at 8:00 AM daily
+  python scheduler.py --pharma-time 08:30               # Pharma news at 8:30 AM daily
+  python scheduler.py --genome-time 09:00               # Genome Research at 9:00 AM daily
+  python scheduler.py --genetics-time 09:30             # Genetics Research at 9:30 AM daily
+  python scheduler.py --energy-time 10:00               # Energy news at 10:00 AM daily
+  python scheduler.py --rare-earth-time 10:30           # Rare Earth news at 10:30 AM daily
+  python scheduler.py --ai-time 07:00 --run-now         # also fire immediately on start
 """
 import argparse
 import os
@@ -23,7 +27,60 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# ── Channel configurations ─────────────────────────────────────────────────────
+_CHANNEL_CONFIGS = {
+    "medical": {
+        "key": "medical",
+        "title": "Medical News",
+        "token_env": "TELEGRAM_MEDICAL_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_MEDICAL_CHAT_ID",
+        "feeds_category": "Health & Medicine",
+        "topic": "cardiology pulmonology nephrology pediatrics endocrinology diabetes psychiatry oncology AI medicine",
+    },
+    "pharma": {
+        "key": "pharma",
+        "title": "Pharma News",
+        "token_env": "TELEGRAM_PHARMA_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_PHARMA_CHAT_ID",
+        "feeds_category": "Pharmaceutical",
+        "topic": "pharmaceutical drug discovery FDA clinical trial biotech biopharma drug approval",
+    },
+    "genome": {
+        "key": "genome",
+        "title": "Genome Research",
+        "token_env": "TELEGRAM_GENOME_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_GENOME_CHAT_ID",
+        "feeds_category": "Genome Research",
+        "topic": "genomics genome sequencing CRISPR gene editing bioinformatics",
+    },
+    "genetics": {
+        "key": "genetics",
+        "title": "Genetics Research",
+        "token_env": "TELEGRAM_GENETICS_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_GENETICS_CHAT_ID",
+        "feeds_category": "Genetics Research",
+        "topic": "genetics gene therapy genetic disorder hereditary mutation chromosome",
+    },
+    "energy": {
+        "key": "energy",
+        "title": "Energy News",
+        "token_env": "TELEGRAM_ENERGY_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_ENERGY_CHAT_ID",
+        "feeds_category": "Energy",
+        "topic": "energy solar wind nuclear renewable battery grid clean energy hydrogen",
+    },
+    "rare_earth": {
+        "key": "rare_earth",
+        "title": "Rare Earth News",
+        "token_env": "TELEGRAM_RARE_EARTH_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_RARE_EARTH_CHAT_ID",
+        "feeds_category": "Rare Earth",
+        "topic": "rare earth minerals lithium cobalt mining critical minerals supply chain",
+    },
+}
+
+
+# ── Helpers ────────────────────────────────────────────────────────────────────
 
 def _log(msg: str) -> None:
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {msg}", flush=True)
@@ -43,13 +100,12 @@ def _run_ai_digest() -> None:
         _log(f"AI News digest failed: {exc}")
 
 
-def _run_medical_news() -> None:
-    """Run the medical news topic search and send to the Medical News Channel."""
-    _log("Running Medical News search...")
+def _run_channel(cfg: dict) -> None:
+    """Run a topic search for the given channel config and send to Telegram."""
+    title = cfg["title"]
+    _log(f"Running {title} search...")
     try:
-        import os as _os
         from src.config import Config
-        from src.logger import setup_logger
         from src.news.agent import TopicNewsAgent
         from src.news.deduper import deduplicate_news
         from src.news.fetcher import NewsFetcher
@@ -58,10 +114,9 @@ def _run_medical_news() -> None:
 
         config = Config()
         today = datetime.now().strftime("%Y-%m-%d")
-        topic = "cardiology pulmonology nephrology pediatrics endocrinology psychiatry oncology AI medicine"
 
         fetcher = NewsFetcher()
-        fetcher.rss_feeds = fetcher.get_feeds_for_category("Health & Medicine")
+        fetcher.rss_feeds = fetcher.get_feeds_for_category(cfg["feeds_category"])
 
         agent = TopicNewsAgent(
             provider_name=config.llm_provider,
@@ -70,40 +125,51 @@ def _run_medical_news() -> None:
             fetcher=fetcher,
         )
 
-        articles = agent.collect(topic, max_sources=20)
+        articles = agent.collect(cfg["topic"], max_sources=20)
         if not articles:
-            _log("No medical articles found.")
+            _log(f"No articles found for {title}.")
             return
 
         articles = deduplicate_news(articles)
-        _log(f"Collected {len(articles)} unique medical articles.")
+        _log(f"Collected {len(articles)} unique articles for {title}.")
 
         summarizer = Summarizer(
             provider_name=config.llm_provider,
             api_key=config.llm_api_key,
             model=config.llm_model,
         )
-        digest = summarizer.summarize(articles, topics=[topic], today=today)
+        digest = summarizer.summarize(articles, topics=[cfg["topic"]], today=today)
 
-        medical_chat_id = _os.getenv("TELEGRAM_MEDICAL_CHAT_ID", "").strip()
-        medical_bot_token = _os.getenv("TELEGRAM_MEDICAL_BOT_TOKEN", "").strip()
+        from src.db import Database
 
-        if medical_chat_id:
-            telegram = TelegramNotifier(
-                bot_token=medical_bot_token or None,
-                chat_id=medical_chat_id,
-            )
+        chat_id = os.getenv(cfg["chat_id_env"], "").strip()
+        bot_token = os.getenv(cfg["token_env"], "").strip()
+        ai_bot_token = os.getenv("TELEGRAM_AI_BOT_TOKEN", "").strip()
+
+        # Broadcast to the dedicated channel (if configured)
+        if chat_id:
+            telegram = TelegramNotifier(bot_token=bot_token or None, chat_id=chat_id)
+            if telegram.send_digest_summary(digest, channel_title=title):
+                _log(f"{title} sent successfully.")
+            else:
+                _log(f"{title} send failed.")
         else:
-            _log("TELEGRAM_MEDICAL_CHAT_ID not set — sending to default channel.")
-            telegram = TelegramNotifier()
+            _log(f"{cfg['chat_id_env']} not set — skipping channel broadcast.")
 
-        if telegram.send_digest_summary(digest):
-            _log("Medical News sent successfully.")
-        else:
-            _log("Medical News send failed.")
+        # Deliver to individual subscribers
+        db = Database()
+        channel_key = cfg.get("key", "")
+        if channel_key:
+            subscribers = db.get_subscribers(channel_key)
+            _log(f"Delivering {title} to {len(subscribers)} subscriber(s)...")
+            for sub_chat_id in subscribers:
+                TelegramNotifier(
+                    bot_token=ai_bot_token or None,
+                    chat_id=sub_chat_id,
+                ).send_digest_summary(digest, channel_title=title)
 
     except Exception as exc:
-        _log(f"Medical News search failed: {exc}")
+        _log(f"{title} search failed: {exc}")
 
 
 def _validate_time(value: str) -> str:
@@ -115,52 +181,52 @@ def _validate_time(value: str) -> str:
         raise argparse.ArgumentTypeError(f"Time must be in HH:MM format (e.g. 07:00), got: {value!r}")
 
 
-# ── Main ──────────────────────────────────────────────────────────────────────
+# ── Main ───────────────────────────────────────────────────────────────────────
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Schedule daily AI and/or Medical news digests to Telegram."
+        description="Schedule daily AI and specialty news digests to Telegram."
     )
-    parser.add_argument(
-        "--ai-time",
-        type=_validate_time,
-        default=os.getenv("SCHEDULE_AI_TIME", ""),
-        metavar="HH:MM",
-        help="Time to send the AI News digest daily (e.g. 07:00). Reads SCHEDULE_AI_TIME from .env if omitted.",
-    )
-    parser.add_argument(
-        "--medical-time",
-        type=_validate_time,
-        default=os.getenv("SCHEDULE_MEDICAL_TIME", ""),
-        metavar="HH:MM",
-        help="Time to send Medical News daily (e.g. 08:00). Reads SCHEDULE_MEDICAL_TIME from .env if omitted.",
-    )
-    parser.add_argument(
-        "--run-now",
-        action="store_true",
-        help="Fire all scheduled jobs immediately on startup (in addition to the scheduled time).",
-    )
+    parser.add_argument("--ai-time",         type=_validate_time, default=os.getenv("SCHEDULE_AI_TIME", ""),         metavar="HH:MM", help="Time to send the AI News digest daily.")
+    parser.add_argument("--medical-time",    type=_validate_time, default=os.getenv("SCHEDULE_MEDICAL_TIME", ""),    metavar="HH:MM", help="Time to send Medical News daily.")
+    parser.add_argument("--pharma-time",     type=_validate_time, default=os.getenv("SCHEDULE_PHARMA_TIME", ""),     metavar="HH:MM", help="Time to send Pharmaceutical News daily.")
+    parser.add_argument("--genome-time",     type=_validate_time, default=os.getenv("SCHEDULE_GENOME_TIME", ""),     metavar="HH:MM", help="Time to send Genome Research daily.")
+    parser.add_argument("--genetics-time",   type=_validate_time, default=os.getenv("SCHEDULE_GENETICS_TIME", ""),   metavar="HH:MM", help="Time to send Genetics Research daily.")
+    parser.add_argument("--energy-time",     type=_validate_time, default=os.getenv("SCHEDULE_ENERGY_TIME", ""),     metavar="HH:MM", help="Time to send Energy News daily.")
+    parser.add_argument("--rare-earth-time", type=_validate_time, default=os.getenv("SCHEDULE_RARE_EARTH_TIME", ""), metavar="HH:MM", help="Time to send Rare Earth News daily.")
+    parser.add_argument("--run-now",         action="store_true",                                                                      help="Fire all scheduled jobs immediately on startup.")
     args = parser.parse_args()
 
-    if not args.ai_time and not args.medical_time:
+    # Build list of (time, label, job_fn) for all enabled schedules
+    scheduled = []
+    if args.ai_time:
+        scheduled.append((args.ai_time, "AI News digest", _run_ai_digest))
+    for key, attr, label in [
+        ("medical",   "medical_time",    "Medical News"),
+        ("pharma",    "pharma_time",     "Pharmaceutical News"),
+        ("genome",    "genome_time",     "Genome Research"),
+        ("genetics",  "genetics_time",   "Genetics Research"),
+        ("energy",    "energy_time",     "Energy News"),
+        ("rare_earth","rare_earth_time", "Rare Earth News"),
+    ]:
+        t = getattr(args, attr)
+        if t:
+            cfg = _CHANNEL_CONFIGS[key]
+            scheduled.append((t, label, lambda c=cfg: _run_channel(c)))
+
+    if not scheduled:
         parser.error(
-            "Provide at least one of --ai-time or --medical-time.\n"
-            "You can also set SCHEDULE_AI_TIME and/or SCHEDULE_MEDICAL_TIME in your .env file."
+            "Provide at least one schedule time (e.g. --ai-time 07:00).\n"
+            "You can also set SCHEDULE_AI_TIME, SCHEDULE_MEDICAL_TIME, etc. in your .env file."
         )
 
     print()
     print("╔══════════════════════════════════════════════════╗")
     print("║           AI News Bot — Scheduler               ║")
     print("╠══════════════════════════════════════════════════╣")
-
-    if args.ai_time:
-        schedule.every().day.at(args.ai_time).do(_run_ai_digest)
-        print(f"║  AI News digest      →  daily at {args.ai_time}          ║")
-
-    if args.medical_time:
-        schedule.every().day.at(args.medical_time).do(_run_medical_news)
-        print(f"║  Medical News        →  daily at {args.medical_time}          ║")
-
+    for t, label, fn in scheduled:
+        schedule.every().day.at(t).do(fn)
+        print(f"║  {label:<24}  →  daily at {t}     ║")
     print("╠══════════════════════════════════════════════════╣")
     print("║  Press Ctrl+C to stop                           ║")
     print("╚══════════════════════════════════════════════════╝")
@@ -173,11 +239,10 @@ def main() -> int:
     try:
         while True:
             schedule.run_pending()
-            # Show next scheduled run every hour so user knows the process is alive
             next_run = schedule.next_run()
             if next_run:
                 remaining = (next_run - datetime.now()).total_seconds()
-                if int(remaining) % 3600 < 1:  # log once per hour
+                if int(remaining) % 3600 < 1:
                     _log(f"Next job at {next_run.strftime('%Y-%m-%d %H:%M:%S')} "
                          f"({int(remaining // 60)} min away)")
             time.sleep(30)

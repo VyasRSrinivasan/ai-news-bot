@@ -99,6 +99,39 @@ class NewsFetcher:
             "Electrek": "https://electrek.co/feed/",
             "IEEE Spectrum": "https://spectrum.ieee.org/feeds/feed.rss",
             "Google News EVs": "https://news.google.com/rss/search?q=electric+vehicle+EV&hl=en-US&gl=US&ceid=US:en",
+
+            # Pharmaceutical & Biotech
+            "Google News Pharma": "https://news.google.com/rss/search?q=pharmaceutical+drug+FDA&hl=en-US&gl=US&ceid=US:en",
+            "Google News Drug Discovery": "https://news.google.com/rss/search?q=drug+discovery+clinical+trial&hl=en-US&gl=US&ceid=US:en",
+            "Google News Biotech Industry": "https://news.google.com/rss/search?q=biotech+biopharma+drug+approval&hl=en-US&gl=US&ceid=US:en",
+            "STAT News": "https://www.statnews.com/feed/",
+            "FierceBiotech": "https://www.fiercebiotech.com/rss/xml",
+
+            # Genomics
+            "Google News Genomics": "https://news.google.com/rss/search?q=genomics+genome+sequencing&hl=en-US&gl=US&ceid=US:en",
+            "Google News CRISPR": "https://news.google.com/rss/search?q=CRISPR+gene+editing+genome&hl=en-US&gl=US&ceid=US:en",
+            "arXiv Quantitative Biology": "https://rss.arxiv.org/rss/q-bio",
+
+            # Genetics
+            "Google News Genetics": "https://news.google.com/rss/search?q=genetics+genetic+research&hl=en-US&gl=US&ceid=US:en",
+            "Google News Gene Therapy": "https://news.google.com/rss/search?q=gene+therapy+genetic+disorder&hl=en-US&gl=US&ceid=US:en",
+
+            # Energy
+            "Google News Renewable Energy": "https://news.google.com/rss/search?q=renewable+energy+solar+wind&hl=en-US&gl=US&ceid=US:en",
+            "Google News Nuclear Energy": "https://news.google.com/rss/search?q=nuclear+energy+power+plant&hl=en-US&gl=US&ceid=US:en",
+            "Google News Battery Technology": "https://news.google.com/rss/search?q=battery+technology+energy+storage&hl=en-US&gl=US&ceid=US:en",
+            "CleanTechnica": "https://cleantechnica.com/feed/",
+            "Google News Energy Transition": "https://news.google.com/rss/search?q=energy+transition+clean+energy+grid&hl=en-US&gl=US&ceid=US:en",
+
+            # Rare Earth & Critical Minerals
+            "Google News Rare Earth": "https://news.google.com/rss/search?q=rare+earth+minerals+mining&hl=en-US&gl=US&ceid=US:en",
+            "Google News Critical Minerals": "https://news.google.com/rss/search?q=critical+minerals+lithium+cobalt&hl=en-US&gl=US&ceid=US:en",
+            "Google News Mining Technology": "https://news.google.com/rss/search?q=mining+technology+mineral+supply+chain&hl=en-US&gl=US&ceid=US:en",
+
+            # Psychology & Behavioral Science
+            "Google News Psychology": "https://news.google.com/rss/search?q=psychology+behavioral+science&hl=en-US&gl=US&ceid=US:en",
+            "Google News Neuroscience": "https://news.google.com/rss/search?q=neuroscience+brain+research&hl=en-US&gl=US&ceid=US:en",
+            "Google News Cognitive Science": "https://news.google.com/rss/search?q=cognitive+science+psychology+research&hl=en-US&gl=US&ceid=US:en",
         }
 
         # Mapping of topic-search categories to relevant feed names
@@ -155,6 +188,32 @@ class NewsFetcher:
                 # Robotics & EVs
                 "Robotics Business Review", "Autonomous Vehicle News",
                 "Electrek", "IEEE Spectrum", "Google News EVs",
+            ],
+            "Pharmaceutical": [
+                "Google News Pharma", "Google News Drug Discovery", "Google News Biotech Industry",
+                "STAT News", "FierceBiotech", "Healthcare IT News AI", "MedPage Today",
+            ],
+            "Genome Research": [
+                "Google News Genomics", "Google News CRISPR", "arXiv Quantitative Biology",
+                "Google News Genetics", "Google News Gene Therapy",
+            ],
+            "Genetics Research": [
+                "Google News Genetics", "Google News Gene Therapy",
+                "Google News Genomics", "arXiv Quantitative Biology",
+            ],
+            "Energy": [
+                "Google News Renewable Energy", "Google News Nuclear Energy",
+                "Google News Battery Technology", "CleanTechnica",
+                "Google News Energy Transition", "Electrek", "IEEE Spectrum",
+            ],
+            "Rare Earth": [
+                "Google News Rare Earth", "Google News Critical Minerals",
+                "Google News Mining Technology", "Reuters Business", "Bloomberg Technology",
+            ],
+            "Psychology": [
+                "Google News Psychology", "Google News Neuroscience",
+                "Google News Cognitive Science", "Google News Mental Health",
+                "Google News Psychiatry",
             ],
         }
 

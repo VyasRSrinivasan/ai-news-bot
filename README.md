@@ -33,7 +33,8 @@
 
 | [🟢 Beginner's Guide](#-beginners-guide--start-here-if-youre-new) | [✨ Features](#features) | [🚀 Quick Start](#quick-start-github-actions--recommended) | [🔍 Topic Search](#interactive-topic-search) |
 | :---------------------------------------------------------------: | :---------------------: | :---------------------------------------------------------: | :------------------------------------------: |
-| [⏰ Scheduler](#scheduler) | [⚙️ Configuration](#configuration) | [📧 Email Setup](#email-setup-guide) | [🔧 Troubleshooting](#troubleshooting) |
+| [⏰ Scheduler](#scheduler) | [🤖 Subscription Bot](#subscription-bot) | [⚙️ Configuration](#configuration) | [📧 Email Setup](#email-setup-guide) |
+| [🔧 Troubleshooting](#troubleshooting) | [📁 Project Structure](#project-structure) | | |
 
 </div>
 
@@ -46,7 +47,7 @@ Subscribe to receive automated digests directly in Telegram — no setup require
 | Channel | Topics | Link |
 | --- | --- | --- |
 | **AI News Channel** | Technology · Business & Finance · Science & Research · Politics & Policy · Robotics & EVs | [t.me/ainewsbot01](https://t.me/ainewsbot01) |
-| **Medical News Channel** | Cardiology · Pulmonology · Nephrology · Pediatrics · Endocrinology · Psychiatry · Oncology · AI in Medicine | [t.me/medicalnewsbot01](https://t.me/medicalnewsbot01) |
+| **Medical News Channel** | Cardiology · Pulmonology · Nephrology · Pediatrics · Endocrinology · Diabetes · Psychiatry · Oncology · AI in Medicine | [t.me/medicalnewsbot01](https://t.me/medicalnewsbot01) |
 
 > Want to run your own channels? Follow the [setup guide below](#notification-channels-setup) to deploy this bot for any topic.
 
@@ -54,15 +55,16 @@ Subscribe to receive automated digests directly in Telegram — no setup require
 
 ## Features
 
-- **Two Modes**: Run a scheduled daily digest *or* search for any topic on demand
+- **Three Modes**: Scheduled daily digest, on-demand topic search, or interactive subscription bot
+- **Subscription Bot**: Users choose their own channels via an inline Telegram keyboard — preferences stored in SQLite
 - **Agentic Topic Search**: Claude autonomously selects and fetches from curated RSS sources based on your topic
-- **Dual Telegram Channels**: Separate **AI News Channel** and **Medical News Channel** — each gets only relevant content
-- **Medical Specialty Coverage**: Dedicated feeds for Cardiology, Pulmonology, Nephrology, Pediatrics, Endocrinology, Psychiatry, Oncology, and AI in Medicine — routed to a separate channel
-- **Category-Curated Feeds**: Each preset category (Technology, Business, Health…) maps to its own hand-picked RSS sources
-- **Interactive News Type Menu**: Choose AI & Technology or Medical News upfront — the bot routes to the right channel automatically
-- **Structured JSON Digest**: LLM returns categorized stories with importance ratings — not raw text
+- **8 Specialty Telegram Channels**: AI News, Medical, Pharma, Genome Research, Genetics Research, Energy, Rare Earth, Psychology — each gets only relevant content
+- **Medical Specialty Coverage**: Dedicated feeds for Cardiology, Pulmonology, Nephrology, Pediatrics, Endocrinology, **Diabetes**, Psychiatry, Oncology, and AI in Medicine
+- **Category-Curated Feeds**: Each preset category maps to its own hand-picked RSS sources
+- **Interactive News Type Menu**: 8-option menu — the bot routes to the right channel automatically
+- **Structured JSON Digest**: LLM returns categorized stories with importance ratings, pro/con summaries — not raw text
 - **Styled HTML Email**: Digest is rendered from structured JSON into a clean, mobile-friendly HTML email
-- **Telegram & Discord Short Summaries**: Concise embeds with headline + top stories per category
+- **Telegram & Discord Short Summaries**: Concise embeds with headline + top stories per category, including pro/con per story
 - **Deduplication Memory**: `seen_urls.json` tracks sent articles across runs — no repeated stories
 - **Multi-Provider LLM Support**: Claude, DeepSeek, Gemini, Grok, or OpenAI
 - **50+ RSS Sources**: TechCrunch, VentureBeat, arXiv, OpenAI Blog, DeepMind, MedPage Today, AHA News, Google News specialty feeds, and more
@@ -176,8 +178,8 @@ LLM_PROVIDER=claude
 ANTHROPIC_API_KEY=sk-ant-YOUR-KEY-HERE
 
 NOTIFICATION_METHODS=telegram
-TELEGRAM_BOT_TOKEN=YOUR-BOT-TOKEN-HERE
-TELEGRAM_CHAT_ID=YOUR-CHAT-ID-HERE
+TELEGRAM_AI_BOT_TOKEN=YOUR-BOT-TOKEN-HERE
+TELEGRAM_AI_CHAT_ID=YOUR-CHAT-ID-HERE
 ```
 
 Replace `YOUR-KEY-HERE`, `YOUR-BOT-TOKEN-HERE`, and `YOUR-CHAT-ID-HERE` with the values you saved in Steps 3 and 4.
@@ -238,23 +240,33 @@ deduplicate_news_data()  ──► seen_urls.json (persisted)
      ▼
 Summarizer.summarize()  ──► JSON digest {date, headline, categories[]}
      │
-     ├──► EmailNotifier.send_digest()            → styled HTML email
-     ├──► TelegramNotifier(TELEGRAM_CHAT_ID)     → AI News Channel
-     ├──► TelegramNotifier(TELEGRAM_MEDICAL_*)   → Medical News Channel (medical categories only)
-     ├──► DiscordNotifier.send_digest_summary()  → Discord embed
-     └──► SlackNotifier / WebhookNotifier        → text summary
+     ├──► EmailNotifier.send_digest()                    → styled HTML email
+     ├──► TelegramNotifier(TELEGRAM_AI_CHAT_ID)          → AI News Channel
+     ├──► TelegramNotifier(each subscriber of "ai")      → individual subscribers
+     ├──► TelegramNotifier(TELEGRAM_MEDICAL_*)           → Medical Channel (filtered)
+     ├──► TelegramNotifier(each medical subscriber)      → individual subscribers
+     ├──► TelegramNotifier(TELEGRAM_PHARMA_* …)          → Pharma / Genome / Genetics /
+     │                                                      Energy / Rare Earth channels
+     ├──► TelegramNotifier(each specialty subscriber)    → individual subscribers
+     ├──► DiscordNotifier.send_digest_summary()          → Discord embed
+     └──► SlackNotifier / WebhookNotifier                → text summary
 ```
 
 ### Interactive Topic Search (`topic_search.py`)
 
 ```
-User chooses: AI News (1) or Medical News (2)
+User chooses: AI (1) · Medical (2) · Pharma (3) · Genome (4) ·
+              Genetics (5) · Energy (6) · Rare Earth (7) · Psychology (8)
      │
      ├── AI News ──► Category menu (Technology, Business, Science…)
      │                    │
      │               Curated feed subset for chosen category
      │
-     └── Medical ──► Specialty submenu → curated feeds for chosen specialty
+     ├── Medical ──► Specialty submenu (Cardiology, Diabetes, Oncology…)
+     │                    │
+     │               Focused feeds for chosen specialty
+     │
+     └── Other   ──► Curated feeds for that domain
      │
      ▼
 TopicNewsAgent  (Claude tool-calling loop)
@@ -267,8 +279,26 @@ deduplicate_news()   (in-session dedup)
      ▼
 Summarizer.summarize(topics=[user_topic])
      │
-     ├── AI News   ──► TelegramNotifier(TELEGRAM_CHAT_ID)
-     └── Medical   ──► TelegramNotifier(TELEGRAM_MEDICAL_CHAT_ID)
+     └── TelegramNotifier → routed to the matching channel
+```
+
+### Subscription Bot (`bot.py`)
+
+```
+User sends /subscribe
+     │
+     ▼
+Inline keyboard — 8 channel toggles (✅ / ☑️)
+     │   🤖 AI News      🏥 Medical News
+     │   💊 Pharma        🧬 Genome Research
+     │   🔬 Genetics      ⚡ Energy News
+     │   ⛏️ Rare Earth   🧠 Psychology
+     │
+     ▼
+User taps 💾 Save → preferences stored in data/subscriptions.db
+     │
+     ▼
+On next scheduler/digest run → individual digests delivered to that user
 ```
 
 ---
@@ -281,6 +311,7 @@ Summarizer.summarize(topics=[user_topic])
 | **Local — Scheduler** | `.env` file | Daily digest on a local machine/server |
 | **Local — Daily** | `.env` file | Manual single run of the full digest |
 | **Local — Topic Search** | `.env` file | On-demand search for any topic |
+| **Subscription Bot** | `.env` file | Let users pick their own channels interactively |
 
 ---
 
@@ -319,8 +350,8 @@ Repository → Settings → Secrets and variables → Actions → New repository
 
 | Secret | Example | Description |
 | --- | --- | --- |
-| `TELEGRAM_BOT_TOKEN` | `123456:ABC...` | Bot token for the AI News Channel ([@BotFather](https://t.me/botfather)) |
-| `TELEGRAM_CHAT_ID` | `123456789` | AI News Channel ID ([@userinfobot](https://t.me/userinfobot)) |
+| `TELEGRAM_AI_BOT_TOKEN` | `123456:ABC...` | Bot token for the AI News Channel ([@BotFather](https://t.me/botfather)) |
+| `TELEGRAM_AI_CHAT_ID` | `123456789` | AI News Channel ID ([@userinfobot](https://t.me/userinfobot)) |
 | `TELEGRAM_MEDICAL_BOT_TOKEN` | `987654:XYZ...` | Bot token for the Medical News Channel (optional) |
 | `TELEGRAM_MEDICAL_CHAT_ID` | `-1001234567890` | Medical News Channel ID — starts with `-100` (optional) |
 
@@ -392,8 +423,8 @@ LLM_PROVIDER=claude
 ANTHROPIC_API_KEY=sk-ant-...
 
 NOTIFICATION_METHODS=telegram
-TELEGRAM_BOT_TOKEN=123456:ABC...
-TELEGRAM_CHAT_ID=123456789
+TELEGRAM_AI_BOT_TOKEN=123456:ABC...
+TELEGRAM_AI_CHAT_ID=123456789
 
 # Optional: separate Medical News Channel
 TELEGRAM_MEDICAL_BOT_TOKEN=987654:XYZ...
@@ -411,6 +442,14 @@ python main.py
 ```bash
 python topic_search.py
 ```
+
+### 5. Run the Subscription Bot
+
+```bash
+python bot.py
+```
+
+Keep this running alongside the scheduler. Users DM your bot on Telegram and use `/subscribe` to pick their channels.
 
 ---
 
@@ -449,15 +488,28 @@ When run without arguments, the script first asks which type of news you want:
 │  1 │ AI & Technology News                       │
 │  2 │ Medical News                               │
 │    │ Cardiology · Pulmonology · Nephrology      │
-│    │ Pediatrics · Endocrinology · Psychiatry    │
-│    │ Oncology · AI in Medicine                  │
+│    │ Pediatrics · Endocrinology · Diabetes      │
+│    │ Psychiatry · Oncology · AI in Medicine     │
+│  3 │ Pharmaceutical News                        │
+│    │ Pharma · Biotech · FDA · Clinical Trials   │
+│  4 │ Genome Research News                       │
+│    │ Genomics · Sequencing · CRISPR             │
+│  5 │ Genetics Research News                     │
+│    │ Gene Therapy · Hereditary · Mutation       │
+│  6 │ Energy News                                │
+│    │ Solar · Wind · Nuclear · Renewable         │
+│  7 │ Rare Earth News                            │
+│    │ Lithium · Mining · Critical Minerals       │
+│  8 │ Psychology News                            │
+│    │ Behavioral · Neuroscience · Cognitive      │
 └────┴────────────────────────────────────────────┘
 
-Select news type [1-2]:
+Select news type [1-8]:
 ```
 
 - **Option 1** → shows the category menu below, sends to **AI News Channel**
 - **Option 2** → shows the medical specialty submenu below, sends to **Medical News Channel**
+- **Options 3–8** → fetches focused news, sends to the matching specialty channel
 
 ### Category Menu (AI News)
 
@@ -501,11 +553,13 @@ After selecting Medical News, you choose a specialty:
 │  2 │ Pulmonology            │ lung disease, ...  │
 │  3 │ Nephrology             │ kidney disease,... │
 │  4 │ Pediatrics             │ child health, ...  │
-│  5 │ Endocrinology          │ diabetes, thyroid  │
-│  6 │ Psychiatry             │ mental health, ... │
-│  7 │ Oncology               │ cancer, immuno...  │
-│  8 │ AI in Medicine         │ medical AI, ...    │
-│  9 │ All Specialties        │ all of the above   │
+│  5 │ Endocrinology          │ thyroid, hormones  │
+│  6 │ Diabetes               │ insulin, glucose,  │
+│    │                        │ T1D, T2D           │
+│  7 │ Psychiatry             │ mental health, ... │
+│  8 │ Oncology               │ cancer, immuno...  │
+│  9 │ AI in Medicine         │ medical AI, ...    │
+│ 10 │ All Specialties        │ all of the above   │
 └────┴────────────────────────┴───────────────────┘
 ```
 
@@ -529,7 +583,7 @@ For non-Claude providers (or if tool-calling fails), the agent falls back to key
 ### Usage
 
 ```bash
-# Schedule both channels (reads times from .env)
+# Schedule all channels (reads times from .env)
 python scheduler.py
 
 # Schedule AI digest at 7:00 AM daily
@@ -538,12 +592,16 @@ python scheduler.py --ai-time 07:00
 # Schedule Medical news at 8:00 AM daily
 python scheduler.py --medical-time 08:00
 
-# Schedule both
-python scheduler.py --ai-time 07:00 --medical-time 08:00
+# Schedule multiple specialty channels
+python scheduler.py --ai-time 07:00 --medical-time 08:00 \
+  --pharma-time 08:30 --genome-time 09:00 --genetics-time 09:30 \
+  --energy-time 10:00 --rare-earth-time 10:30
 
 # Fire immediately on startup, then continue on schedule
 python scheduler.py --ai-time 07:00 --run-now
 ```
+
+Each channel delivery also sends to individual subscribers who opted in via `bot.py`.
 
 ### `.env` Configuration
 
@@ -551,6 +609,11 @@ python scheduler.py --ai-time 07:00 --run-now
 # Times for the local scheduler (HH:MM, 24-hour format)
 SCHEDULE_AI_TIME=07:00
 SCHEDULE_MEDICAL_TIME=08:00
+SCHEDULE_PHARMA_TIME=08:30
+SCHEDULE_GENOME_TIME=09:00
+SCHEDULE_GENETICS_TIME=09:30
+SCHEDULE_ENERGY_TIME=10:00
+SCHEDULE_RARE_EARTH_TIME=10:30
 ```
 
 > **Note:** The scheduler runs in the foreground. Keep the terminal open (or use a tool like `screen`, `tmux`, or `nohup`) to keep it running.
@@ -566,11 +629,12 @@ ai-news-bot/
 │       └── daily-news.yml          # Cron job + seen_urls.json commit
 ├── src/
 │   ├── config.py                   # Config management (reads config.yaml + env)
+│   ├── db.py                       # SQLite subscription store (user channel prefs)
 │   ├── logger.py                   # Logging setup
 │   ├── news/
-│   │   ├── fetcher.py              # RSS feed fetching (20+ sources)
+│   │   ├── fetcher.py              # RSS feed fetching (50+ sources)
 │   │   ├── deduper.py              # In-session + cross-run deduplication
-│   │   ├── summarizer.py           # LLM call → JSON digest
+│   │   ├── summarizer.py           # LLM call → JSON digest with pro/con per story
 │   │   ├── agent.py                # TopicNewsAgent (agentic RSS fetch)
 │   │   ├── generator.py            # Two-stage news generation (legacy)
 │   │   └── web_search.py           # DuckDuckGo search tool
@@ -583,12 +647,15 @@ ai-news-bot/
 │   │   └── openai_provider.py      # OpenAI
 │   └── notifiers/
 │       ├── email_notifier.py       # Gmail SMTP — send_digest() renders JSON → HTML
-│       ├── telegram_notifier.py    # Telegram — send_digest_summary()
+│       ├── telegram_notifier.py    # Telegram — send_digest_summary() with pro/con
 │       ├── discord_notifier.py     # Discord embeds — send_digest_summary()
 │       ├── slack_notifier.py       # Slack
 │       └── webhook_notifier.py     # Generic JSON webhook
+├── data/
+│   └── subscriptions.db            # SQLite DB — user channel subscriptions (auto-created)
 ├── main.py                         # Daily digest orchestrator
-├── topic_search.py                 # Interactive topic search CLI
+├── bot.py                          # Subscription bot — /subscribe inline keyboard
+├── topic_search.py                 # Interactive topic search CLI (8 channel types)
 ├── scheduler.py                    # Local scheduler (runs at configured HH:MM times)
 ├── config.yaml                     # LLM, news topics, prompt templates
 ├── seen_urls.json                  # Persisted deduplication log (auto-updated)
@@ -624,6 +691,7 @@ news:
     - Nephrology
     - Pediatrics
     - Endocrinology
+    - Diabetes
     - Psychiatry
     - Oncology
     - AI in Medicine
@@ -655,10 +723,21 @@ logging:
 | `GMAIL_ADDRESS` | Email only | Your Gmail address |
 | `GMAIL_APP_PASSWORD` | Email only | 16-char Gmail App Password |
 | `EMAIL_TO` | Email only | Recipient address |
-| `TELEGRAM_BOT_TOKEN` | Telegram only | Bot token for AI News Channel (from @BotFather) |
-| `TELEGRAM_CHAT_ID` | Telegram only | AI News Channel — user, group, or channel ID |
+| `TELEGRAM_AI_BOT_TOKEN` | Telegram only | Bot token for AI News Channel and subscription bot |
+| `TELEGRAM_AI_CHAT_ID` | Telegram only | AI News Channel — user, group, or channel ID |
 | `TELEGRAM_MEDICAL_BOT_TOKEN` | Optional | Bot token for Medical News Channel |
 | `TELEGRAM_MEDICAL_CHAT_ID` | Optional | Medical News Channel ID (starts with `-100` for channels) |
+| `TELEGRAM_PHARMA_BOT_TOKEN` | Optional | Bot token for Pharma News Channel |
+| `TELEGRAM_PHARMA_CHAT_ID` | Optional | Pharma News Channel ID |
+| `TELEGRAM_GENOME_BOT_TOKEN` | Optional | Bot token for Genome Research Channel |
+| `TELEGRAM_GENOME_CHAT_ID` | Optional | Genome Research Channel ID |
+| `TELEGRAM_GENETICS_BOT_TOKEN` | Optional | Bot token for Genetics Research Channel |
+| `TELEGRAM_GENETICS_CHAT_ID` | Optional | Genetics Research Channel ID |
+| `TELEGRAM_ENERGY_BOT_TOKEN` | Optional | Bot token for Energy News Channel |
+| `TELEGRAM_ENERGY_CHAT_ID` | Optional | Energy News Channel ID |
+| `TELEGRAM_RARE_EARTH_BOT_TOKEN` | Optional | Bot token for Rare Earth News Channel |
+| `TELEGRAM_RARE_EARTH_CHAT_ID` | Optional | Rare Earth News Channel ID |
+| `DB_PATH` | Optional | Path to subscriptions SQLite DB (default: `data/subscriptions.db`) |
 | `DISCORD_WEBHOOK_URL` | Discord only | Discord Webhook URL |
 | `SLACK_WEBHOOK_URL` | Slack only | Slack Incoming Webhook URL |
 | `WEBHOOK_URL` | Webhook only | Generic JSON webhook endpoint |
@@ -744,34 +823,51 @@ NOTIFICATION_METHODS=email
 
 ### Telegram
 
-The bot supports two separate Telegram channels — one for AI news and one for medical news.
+The bot supports 8 specialty Telegram channels — each receives only its relevant content.
 
 | Channel | Link |
 | --- | --- |
 | AI News Channel | [t.me/ainewsbot01](https://t.me/ainewsbot01) |
 | Medical News Channel | [t.me/medicalnewsbot01](https://t.me/medicalnewsbot01) |
 
-**To set up your own AI News Channel:**
+**To set up your own channel:**
 1. Message [@BotFather](https://t.me/botfather) → `/newbot` → copy the token
-2. Get your chat ID from [@userinfobot](https://t.me/userinfobot)
-3. Set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`
-
-**To set up your own Medical News Channel:**
-1. Create a second bot via [@BotFather](https://t.me/botfather) → `/newbot` → copy its token
 2. Create a Telegram channel, add the bot as **Admin**
 3. Forward any message from that channel to [@userinfobot](https://t.me/userinfobot) to get its ID (starts with `-100`)
-4. Set `TELEGRAM_MEDICAL_BOT_TOKEN` and `TELEGRAM_MEDICAL_CHAT_ID`
+4. Set the matching `TELEGRAM_*_BOT_TOKEN` and `TELEGRAM_*_CHAT_ID` in `.env`
 
-> **Tip:** You can reuse the same bot token for both channels — just add it as admin to both and set `TELEGRAM_MEDICAL_BOT_TOKEN` to the same value as `TELEGRAM_BOT_TOKEN`.
+> **Tip:** You can reuse `TELEGRAM_AI_BOT_TOKEN` for all channels — just add that bot as Admin to each channel.
 
 **Channel routing:**
 
-| Trigger | AI News Channel | Medical News Channel |
-| --- | --- | --- |
-| `python main.py` | Full daily digest | Medical categories only |
-| `python topic_search.py` → option 1 (AI) | Chosen category digest | — |
-| `python topic_search.py` → option 2 (Medical) | — | Choose specialty → sent to Medical Channel |
-| `python topic_search.py --medical` | — | Medical digest |
+| Trigger | Channel |
+| --- | --- |
+| `python main.py` | AI News + all configured specialty channels |
+| `python bot.py` → user `/subscribe` | Saves user preferences; digests delivered on next run |
+| `python topic_search.py` → option 1 | AI News Channel |
+| `python topic_search.py` → option 2 | Medical News Channel |
+| `python topic_search.py` → options 3–8 | Pharma / Genome / Genetics / Energy / Rare Earth / Psychology |
+| `python topic_search.py --all` | All 8 channels simultaneously |
+| `python scheduler.py --medical-time 08:00` | Medical channel + subscribers at 8:00 AM |
+
+### Subscription Bot
+
+`bot.py` lets individual Telegram users subscribe to specific channels without needing to be added to a channel.
+
+```bash
+python bot.py   # keep running alongside scheduler
+```
+
+**Commands:**
+
+| Command | Description |
+| --- | --- |
+| `/start` | Welcome message |
+| `/subscribe` | Open the channel selection keyboard |
+| `/mystatus` | Show your current subscriptions |
+| `/unsubscribe` | Remove all subscriptions |
+
+Subscriptions are stored in `data/subscriptions.db`. On each digest run, subscribers receive their selected channels' digests as direct messages from the bot.
 
 ### Discord
 
@@ -831,10 +927,13 @@ echo "[]" > seen_urls.json
 | `Config file not found` | Ensure `config.yaml` exists in the project root |
 | `No new articles after deduplication` | Clear `seen_urls.json` (`echo "[]" > seen_urls.json`) |
 | Email not sending | Use the 16-char App Password, not your Gmail password |
-| Telegram not sending | Verify `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are correct |
+| Telegram not sending | Verify `TELEGRAM_AI_BOT_TOKEN` and `TELEGRAM_AI_CHAT_ID` are correct |
 | Medical channel not receiving | Ensure `TELEGRAM_MEDICAL_CHAT_ID` is set and the medical bot is an Admin in that channel |
-| Medical channel falls back to AI channel | `TELEGRAM_MEDICAL_CHAT_ID` is blank — fill it in `.env` to enable the medical channel |
+| Specialty channel not receiving | Check the matching `TELEGRAM_*_CHAT_ID` is set and the bot is an Admin in that channel |
+| Subscription bot not responding | Ensure `python bot.py` is running and `TELEGRAM_AI_BOT_TOKEN` is set |
+| Subscribers not receiving digests | Confirm `bot.py` ran before the user subscribed; check `data/subscriptions.db` exists |
 | Agent fetches 0 articles | Check RSS feed connectivity; fallback keyword mode should activate |
+| `ModuleNotFoundError: aiogram` | Run `pip install -r requirements.txt` |
 | `ModuleNotFoundError` | Run `pip install -r requirements.txt` |
 
 ---

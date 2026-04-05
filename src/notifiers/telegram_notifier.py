@@ -28,8 +28,8 @@ class TelegramNotifier:
             chat_id: Telegram chat ID (can be user ID, group ID, or channel ID)
             timeout: Request timeout in seconds
         """
-        self.bot_token = bot_token or os.getenv("TELEGRAM_BOT_TOKEN")
-        self.chat_id = chat_id or os.getenv("TELEGRAM_CHAT_ID")
+        self.bot_token = bot_token or os.getenv("TELEGRAM_AI_BOT_TOKEN")
+        self.chat_id = chat_id or os.getenv("TELEGRAM_AI_CHAT_ID")
         self.timeout = timeout
 
         if self.bot_token:
@@ -106,13 +106,14 @@ class TelegramNotifier:
             logger.error(f"Unexpected error sending Telegram message: {str(e)}", exc_info=True)
             return False
 
-    def send_digest_summary(self, digest: dict, language: str = "en") -> bool:
+    def send_digest_summary(self, digest: dict, language: str = "en", channel_title: str = "AI News") -> bool:
         """
         Send a short Telegram summary of the digest: headline + top stories per category.
 
         Args:
             digest: Dict produced by Summarizer.summarize().
             language: Language code for the subject suffix.
+            channel_title: Title shown in the message header (e.g. "AI News" or "Medical News").
 
         Returns:
             True if message sent successfully, False otherwise.
@@ -127,7 +128,7 @@ class TelegramNotifier:
         lang_suffix = f" [{language.upper()}]" if language != "en" else ""
 
         lines = [
-            f"<b>&#x1F4F0; AI News \u2014 {date}{lang_suffix}</b>",
+            f"<b>&#x1F4F0; {channel_title} \u2014 {date}{lang_suffix}</b>",
             "",
             f"<i>{headline}</i>",
             "",
@@ -149,7 +150,13 @@ class TelegramNotifier:
             for story in sorted_stories[:3]:
                 title = story.get("title", "")
                 url = story.get("url", "#")
+                pro = story.get("pro", "").strip()
+                con = story.get("con", "").strip()
                 lines.append(f"\u2022 <a href='{url}'>{title}</a>")
+                if pro:
+                    lines.append(f"  \u2705 {pro}")
+                if con:
+                    lines.append(f"  \u26a0\ufe0f {con}")
             lines.append("")
 
         lines.append(

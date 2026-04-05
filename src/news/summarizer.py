@@ -22,7 +22,9 @@ Your job is to:
   2. Remove duplicates (same story from multiple sources — keep only the best-sourced version).
   3. Group stories into categories (e.g. "Research", "Products", "Industry", "Policy").
   4. For each story write a 2-sentence summary: one sentence of fact, one of significance.
-  5. Return ONLY valid JSON — no preamble, no markdown fences.
+  5. For each story write a "pro" (a key benefit, opportunity, or positive finding — max 70 characters)
+     and a "con" (a risk, limitation, or caveat — max 70 characters).
+  6. Return ONLY valid JSON — no preamble, no markdown fences.
 
 Output schema:
 {
@@ -35,6 +37,8 @@ Output schema:
         {
           "title": "Story title",
           "summary": "Two-sentence summary.",
+          "pro": "Key benefit or positive finding (max 70 chars).",
+          "con": "Main risk, limitation, or caveat (max 70 chars).",
           "source": "Publication name",
           "url": "https://...",
           "importance": "high | medium | low"
