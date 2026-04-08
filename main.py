@@ -106,6 +106,18 @@ _CHANNEL_ROUTING = [
             "developmental psychology", "neuropsychology", "mindfulness", "emotional maturity", "emotional immaturity"
         },
     },
+    {
+        "key": "sports",
+        "title": "Sports News",
+        "token_env": "TELEGRAM_SPORTS_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_SPORTS_CHAT_ID",
+        "keywords": {
+            "sports", "sport", "football", "american football", "basketball", "soccer",
+            "baseball", "cricket", "tennis", "nfl", "nba", "mlb", "nhl", "ipl", "bcci",
+            "fifa", "premier league", "champions league", "olympics", "athlete",
+            "championship", "tournament", "transfer", "match", "league", "playoff",
+        },
+    },
 ]
 
 

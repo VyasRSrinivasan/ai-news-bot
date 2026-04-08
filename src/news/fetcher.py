@@ -132,6 +132,18 @@ class NewsFetcher:
             "Google News Psychology": "https://news.google.com/rss/search?q=psychology+behavioral+science&hl=en-US&gl=US&ceid=US:en",
             "Google News Neuroscience": "https://news.google.com/rss/search?q=neuroscience+brain+research&hl=en-US&gl=US&ceid=US:en",
             "Google News Cognitive Science": "https://news.google.com/rss/search?q=cognitive+science+psychology+research&hl=en-US&gl=US&ceid=US:en",
+
+            # Sports
+            "ESPN Top News": "https://www.espn.com/espn/rss/news",
+            "BBC Sport": "https://feeds.bbci.co.uk/sport/rss.xml",
+            "Yahoo Sports": "https://sports.yahoo.com/rss/",
+            "Bleacher Report": "https://bleacherreport.com/articles/feed",
+            "Google News Sports": "https://news.google.com/rss/search?q=sports+news&hl=en-US&gl=US&ceid=US:en",
+            "Google News NFL": "https://news.google.com/rss/search?q=NFL+american+football&hl=en-US&gl=US&ceid=US:en",
+            "Google News NBA": "https://news.google.com/rss/search?q=NBA+basketball&hl=en-US&gl=US&ceid=US:en",
+            "Google News MLB": "https://news.google.com/rss/search?q=MLB+baseball&hl=en-US&gl=US&ceid=US:en",
+            "Google News Soccer": "https://news.google.com/rss/search?q=soccer+football+Premier+League&hl=en-US&gl=US&ceid=US:en",
+            "Google News Cricket": "https://news.google.com/rss/search?q=cricket+IPL+Test+match&hl=en-US&gl=US&ceid=US:en",
         }
 
         # Mapping of topic-search categories to relevant feed names
@@ -214,6 +226,11 @@ class NewsFetcher:
                 "Google News Psychology", "Google News Neuroscience",
                 "Google News Cognitive Science", "Google News Mental Health",
                 "Google News Psychiatry",
+            ],
+            "Sports": [
+                "ESPN Top News", "BBC Sport", "Yahoo Sports", "Bleacher Report",
+                "Google News Sports", "Google News NFL", "Google News NBA",
+                "Google News MLB", "Google News Soccer", "Google News Cricket",
             ],
         }
 

@@ -43,6 +43,7 @@ CHANNELS = [
     {"key": "energy",     "title": "⚡ Energy News"},
     {"key": "rare_earth", "title": "⛏️ Rare Earth News"},
     {"key": "psychology", "title": "🧠 Psychology News"},
+    {"key": "sports",     "title": "🏆 Sports News"},
 ]
 
 bot = Bot(token=BOT_TOKEN)
@@ -77,10 +78,10 @@ def _build_keyboard(subscribed: set) -> InlineKeyboardMarkup:
 async def cmd_start(message: Message) -> None:
     await message.answer(
         "<b>👋 Welcome to AI News Bot!</b>\n\n"
-        "I send daily digests across 8 news channels:\n\n"
+        "I send daily digests across 9 news channels:\n\n"
         "🤖 AI News  •  🏥 Medical  •  💊 Pharma\n"
         "🧬 Genome  •  🔬 Genetics  •  ⚡ Energy\n"
-        "⛏️ Rare Earth  •  🧠 Psychology\n\n"
+        "⛏️ Rare Earth  •  🧠 Psychology  •  🏆 Sports\n\n"
         "Use /subscribe to pick which channels you want.\n"
         "Use /mystatus to see your active subscriptions.",
         parse_mode="HTML",

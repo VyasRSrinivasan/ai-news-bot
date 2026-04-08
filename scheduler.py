@@ -6,6 +6,7 @@ Runs the daily digest and/or specialty channel searches automatically at configu
 
 Usage:
   python scheduler.py                                    # uses times from .env
+  python scheduler.py --all-time 10:30                  # all 8 channels via topic_search --all at 10:30 AM
   python scheduler.py --ai-time 07:00                   # AI digest at 7:00 AM daily
   python scheduler.py --medical-time 08:00              # Medical news at 8:00 AM daily
   python scheduler.py --pharma-time 08:30               # Pharma news at 8:30 AM daily
@@ -13,6 +14,7 @@ Usage:
   python scheduler.py --genetics-time 09:30             # Genetics Research at 9:30 AM daily
   python scheduler.py --energy-time 10:00               # Energy news at 10:00 AM daily
   python scheduler.py --rare-earth-time 10:30           # Rare Earth news at 10:30 AM daily
+  python scheduler.py --psychology-time 11:00           # Psychology news at 11:00 AM daily
   python scheduler.py --ai-time 07:00 --run-now         # also fire immediately on start
 """
 import argparse
@@ -85,6 +87,14 @@ _CHANNEL_CONFIGS = {
         "feeds_category": "Psychology",
         "topic": "psychology behavioral science neuroscience cognitive science mental health research",
     },
+    "sports": {
+        "key": "sports",
+        "title": "Sports News",
+        "token_env": "TELEGRAM_SPORTS_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_SPORTS_CHAT_ID",
+        "feeds_category": "Sports",
+        "topic": "sports football american football basketball soccer baseball cricket tennis NFL NBA MLB IPL FIFA Premier League Olympics championship",
+    },
 }
 
 
@@ -92,6 +102,23 @@ _CHANNEL_CONFIGS = {
 
 def _log(msg: str) -> None:
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {msg}", flush=True)
+
+
+def _run_all_channels() -> None:
+    """Run topic_search.py --all to update every channel simultaneously."""
+    import subprocess
+    _log("Running all channels (topic_search --all)...")
+    try:
+        result = subprocess.run(
+            [sys.executable, "topic_search.py", "--all"],
+            check=False,
+        )
+        if result.returncode == 0:
+            _log("All channels updated successfully.")
+        else:
+            _log(f"All channels update finished with errors (exit {result.returncode}).")
+    except Exception as exc:
+        _log(f"All channels update failed: {exc}")
 
 
 def _run_ai_digest() -> None:
@@ -195,6 +222,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(
         description="Schedule daily AI and specialty news digests to Telegram."
     )
+    parser.add_argument("--all-time",        type=_validate_time, default=os.getenv("SCHEDULE_ALL_TIME", ""),        metavar="HH:MM", help="Time to run topic_search --all (all 8 channels) daily.")
     parser.add_argument("--ai-time",         type=_validate_time, default=os.getenv("SCHEDULE_AI_TIME", ""),         metavar="HH:MM", help="Time to send the AI News digest daily.")
     parser.add_argument("--medical-time",    type=_validate_time, default=os.getenv("SCHEDULE_MEDICAL_TIME", ""),    metavar="HH:MM", help="Time to send Medical News daily.")
     parser.add_argument("--pharma-time",     type=_validate_time, default=os.getenv("SCHEDULE_PHARMA_TIME", ""),     metavar="HH:MM", help="Time to send Pharmaceutical News daily.")
@@ -203,11 +231,14 @@ def main() -> int:
     parser.add_argument("--energy-time",     type=_validate_time, default=os.getenv("SCHEDULE_ENERGY_TIME", ""),     metavar="HH:MM", help="Time to send Energy News daily.")
     parser.add_argument("--rare-earth-time", type=_validate_time, default=os.getenv("SCHEDULE_RARE_EARTH_TIME", ""),  metavar="HH:MM", help="Time to send Rare Earth News daily.")
     parser.add_argument("--psychology-time", type=_validate_time, default=os.getenv("SCHEDULE_PSYCHOLOGY_TIME", ""), metavar="HH:MM", help="Time to send Psychology News daily.")
+    parser.add_argument("--sports-time",     type=_validate_time, default=os.getenv("SCHEDULE_SPORTS_TIME", ""),     metavar="HH:MM", help="Time to send Sports News daily.")
     parser.add_argument("--run-now",         action="store_true",                                                                       help="Fire all scheduled jobs immediately on startup.")
     args = parser.parse_args()
 
     # Build list of (time, label, job_fn) for all enabled schedules
     scheduled = []
+    if args.all_time:
+        scheduled.append((args.all_time, "All Channels (topic_search --all)", _run_all_channels))
     if args.ai_time:
         scheduled.append((args.ai_time, "AI News digest", _run_ai_digest))
     for key, attr, label in [
@@ -218,6 +249,7 @@ def main() -> int:
         ("energy",     "energy_time",     "Energy News"),
         ("rare_earth", "rare_earth_time", "Rare Earth News"),
         ("psychology", "psychology_time", "Psychology News"),
+        ("sports",     "sports_time",     "Sports News"),
     ]:
         t = getattr(args, attr)
         if t:

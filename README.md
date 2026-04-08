@@ -835,6 +835,7 @@ The bot supports 8 specialty Telegram channels — each receives only its releva
 | Energy News | [t.me/energynewsbot01](https://t.me/energynewsbot01) |
 | Rare Earth News | [t.me/rareearthnewsbot01](https://t.me/rareearthnewsbot01) |
 | Psychology News | [t.me/psychologynewsbot01](https://t.me/psychologynewsbot01) |
+| Sports News | [t.me/sportsnewsbot01](https://t.me/sportsnewsbot01) |
 
 **To set up your own channel:**
 1. Message [@BotFather](https://t.me/botfather) → `/newbot` → copy the token

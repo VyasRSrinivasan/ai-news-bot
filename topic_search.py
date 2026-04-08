@@ -107,6 +107,13 @@ _SPECIALTY_CHANNELS = {
         "feeds_category": "Psychology",
         "topic": "psychology behavioral science neuroscience cognitive science mental health research",
     },
+    "sports": {
+        "title": "Sports News",
+        "token_env": "TELEGRAM_SPORTS_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_SPORTS_CHAT_ID",
+        "feeds_category": "Sports",
+        "topic": "sports football american football basketball soccer baseball cricket tennis NFL NBA MLB IPL FIFA Premier League Olympics championship",
+    },
 }
 
 _MEDICAL_TOPIC_MAP = {
@@ -250,22 +257,26 @@ def _prompt_news_type() -> str:
     print("│    │ Lithium · Cobalt · Mining · Critical Min.  │")
     print("│  8 │ Psychology News                            │")
     print("│    │ Behavioral Science · Neuroscience          │")
+    print("│  9 │ Sports News                                │")
+    print("│    │ Football · Basketball · Soccer · Baseball  │")
+    print("│    │ Cricket · Tennis · NFL · NBA · IPL         │")
     print("└────┴────────────────────────────────────────────┘")
     print()
 
     _map = {
         "1": "ai", "2": "medical", "3": "pharma", "4": "genome",
         "5": "genetics", "6": "energy", "7": "rare_earth", "8": "psychology",
+        "9": "sports",
     }
     while True:
         try:
-            choice = input("Select news type [1-8]: ").strip()
+            choice = input("Select news type [1-9]: ").strip()
         except (EOFError, KeyboardInterrupt):
             print("\nCancelled.")
             sys.exit(130)
         if choice in _map:
             return _map[choice]
-        print("  Please enter a number between 1 and 8.")
+        print("  Please enter a number between 1 and 9.")
 
 
 def _prompt_category() -> str:
