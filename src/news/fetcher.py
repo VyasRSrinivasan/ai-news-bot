@@ -133,6 +133,30 @@ class NewsFetcher:
             "Google News Neuroscience": "https://news.google.com/rss/search?q=neuroscience+brain+research&hl=en-US&gl=US&ceid=US:en",
             "Google News Cognitive Science": "https://news.google.com/rss/search?q=cognitive+science+psychology+research&hl=en-US&gl=US&ceid=US:en",
 
+            # Finance & Business
+            "Google News Finance": "https://news.google.com/rss/search?q=finance+stock+market+investing&hl=en-US&gl=US&ceid=US:en",
+            "Google News Economy": "https://news.google.com/rss/search?q=economy+GDP+inflation+interest+rates&hl=en-US&gl=US&ceid=US:en",
+            "Google News Crypto": "https://news.google.com/rss/search?q=cryptocurrency+bitcoin+ethereum+DeFi&hl=en-US&gl=US&ceid=US:en",
+            "Google News Wall Street": "https://news.google.com/rss/search?q=Wall+Street+NYSE+NASDAQ+earnings&hl=en-US&gl=US&ceid=US:en",
+            "MarketWatch": "https://feeds.marketwatch.com/marketwatch/topstories/",
+            "Investopedia": "https://www.investopedia.com/feedbuilder/feed/getfeed/?feedName=rss_headline",
+
+            # Entertainment
+            "Google News Entertainment": "https://news.google.com/rss/search?q=entertainment+movies+TV+shows&hl=en-US&gl=US&ceid=US:en",
+            "Google News Hollywood": "https://news.google.com/rss/search?q=Hollywood+film+box+office+celebrity&hl=en-US&gl=US&ceid=US:en",
+            "Google News Streaming": "https://news.google.com/rss/search?q=Netflix+Disney+streaming+series+premiere&hl=en-US&gl=US&ceid=US:en",
+            "Variety": "https://variety.com/feed/",
+            "The Hollywood Reporter": "https://www.hollywoodreporter.com/feed/",
+            "Deadline": "https://deadline.com/feed/",
+
+            # Music
+            "Google News Music": "https://news.google.com/rss/search?q=music+album+release+artist&hl=en-US&gl=US&ceid=US:en",
+            "Google News Music Charts": "https://news.google.com/rss/search?q=Billboard+music+charts+top+songs&hl=en-US&gl=US&ceid=US:en",
+            "Google News Music Industry": "https://news.google.com/rss/search?q=music+industry+record+label+concert+tour&hl=en-US&gl=US&ceid=US:en",
+            "Rolling Stone": "https://www.rollingstone.com/music/feed/",
+            "Pitchfork": "https://pitchfork.com/rss/news/feed.xml",
+            "NME": "https://www.nme.com/feed",
+
             # Sports
             "ESPN Top News": "https://www.espn.com/espn/rss/news",
             "BBC Sport": "https://feeds.bbci.co.uk/sport/rss.xml",
@@ -231,6 +255,19 @@ class NewsFetcher:
                 "ESPN Top News", "BBC Sport", "Yahoo Sports", "Bleacher Report",
                 "Google News Sports", "Google News NFL", "Google News NBA",
                 "Google News MLB", "Google News Soccer", "Google News Cricket",
+            ],
+            "Finance": [
+                "Google News Finance", "Google News Economy", "Google News Crypto",
+                "Google News Wall Street", "MarketWatch", "Investopedia",
+                "Reuters Business", "CNBC Technology", "Bloomberg Technology",
+            ],
+            "Entertainment": [
+                "Google News Entertainment", "Google News Hollywood",
+                "Google News Streaming", "Variety", "The Hollywood Reporter", "Deadline",
+            ],
+            "Music": [
+                "Google News Music", "Google News Music Charts",
+                "Google News Music Industry", "Rolling Stone", "Pitchfork", "NME",
             ],
         }
 

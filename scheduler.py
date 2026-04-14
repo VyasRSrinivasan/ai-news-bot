@@ -95,6 +95,47 @@ _CHANNEL_CONFIGS = {
         "feeds_category": "Sports",
         "topic": "sports football american football basketball soccer baseball cricket tennis NFL NBA MLB IPL FIFA Premier League Olympics championship",
     },
+    "finance": {
+        "key": "finance",
+        "title": "Finance News",
+        "token_env": "TELEGRAM_FINANCE_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_FINANCE_CHAT_ID",
+        "feeds_category": "Finance",
+        "topic": "finance stock market investing economy inflation interest rates cryptocurrency bitcoin wall street earnings",
+    },
+    "entertainment": {
+        "key": "entertainment",
+        "title": "Entertainment News",
+        "token_env": "TELEGRAM_ENTERTAINMENT_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_ENTERTAINMENT_CHAT_ID",
+        "feeds_category": "Entertainment",
+        "topic": "entertainment movies TV shows Hollywood celebrities box office streaming Netflix Disney awards",
+    },
+    "music": {
+        "key": "music",
+        "title": "Music News",
+        "token_env": "TELEGRAM_MUSIC_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_MUSIC_CHAT_ID",
+        "feeds_category": "Music",
+        "topic": "music album release artist concert tour Billboard charts record label pop rock hip hop",
+    },
+}
+
+
+# ── Day-of-week map ────────────────────────────────────────────────────────────
+# Maps a day name (from SCHEDULE_*_DAY env vars) to a schedule job builder.
+# Default is "daily" (every day). Set a channel's _DAY var to e.g. "monday"
+# to publish only on that weekday.
+
+_DAY_MAP = {
+    "daily":     lambda: schedule.every().day,
+    "monday":    lambda: schedule.every().monday,
+    "tuesday":   lambda: schedule.every().tuesday,
+    "wednesday": lambda: schedule.every().wednesday,
+    "thursday":  lambda: schedule.every().thursday,
+    "friday":    lambda: schedule.every().friday,
+    "saturday":  lambda: schedule.every().saturday,
+    "sunday":    lambda: schedule.every().sunday,
 }
 
 
@@ -208,7 +249,9 @@ def _run_channel(cfg: dict) -> None:
 
 
 def _validate_time(value: str) -> str:
-    """Validate HH:MM format."""
+    """Validate HH:MM format. Empty string is allowed (means disabled)."""
+    if not value:
+        return value
     try:
         datetime.strptime(value, "%H:%M")
         return value
@@ -231,30 +274,43 @@ def main() -> int:
     parser.add_argument("--energy-time",     type=_validate_time, default=os.getenv("SCHEDULE_ENERGY_TIME", ""),     metavar="HH:MM", help="Time to send Energy News daily.")
     parser.add_argument("--rare-earth-time", type=_validate_time, default=os.getenv("SCHEDULE_RARE_EARTH_TIME", ""),  metavar="HH:MM", help="Time to send Rare Earth News daily.")
     parser.add_argument("--psychology-time", type=_validate_time, default=os.getenv("SCHEDULE_PSYCHOLOGY_TIME", ""), metavar="HH:MM", help="Time to send Psychology News daily.")
-    parser.add_argument("--sports-time",     type=_validate_time, default=os.getenv("SCHEDULE_SPORTS_TIME", ""),     metavar="HH:MM", help="Time to send Sports News daily.")
+    parser.add_argument("--sports-time",        type=_validate_time, default=os.getenv("SCHEDULE_SPORTS_TIME", ""),        metavar="HH:MM", help="Time to send Sports News daily.")
+    parser.add_argument("--finance-time",       type=_validate_time, default=os.getenv("SCHEDULE_FINANCE_TIME", ""),       metavar="HH:MM", help="Time to send Finance News daily.")
+    parser.add_argument("--entertainment-time", type=_validate_time, default=os.getenv("SCHEDULE_ENTERTAINMENT_TIME", ""), metavar="HH:MM", help="Time to send Entertainment News daily.")
+    parser.add_argument("--music-time",         type=_validate_time, default=os.getenv("SCHEDULE_MUSIC_TIME", ""),         metavar="HH:MM", help="Time to send Music News daily.")
     parser.add_argument("--run-now",         action="store_true",                                                                       help="Fire all scheduled jobs immediately on startup.")
     args = parser.parse_args()
 
-    # Build list of (time, label, job_fn) for all enabled schedules
+    # Build list of (time, label, job_fn, days) for all enabled schedules.
+    # days is a list of day strings, e.g. ["monday"] or ["monday", "thursday"].
+    # Set SCHEDULE_*_DAY to a comma-separated list in .env, e.g. "monday,thursday".
+    # Omit or set to "daily" to run every day.
+    def _days(env_key: str) -> list:
+        raw = os.getenv(f"SCHEDULE_{env_key}_DAY", "daily").strip().lower()
+        return [d.strip() for d in raw.split(",") if d.strip()]
+
     scheduled = []
     if args.all_time:
-        scheduled.append((args.all_time, "All Channels (topic_search --all)", _run_all_channels))
+        scheduled.append((args.all_time, "All Channels (topic_search --all)", _run_all_channels, _days("ALL")))
     if args.ai_time:
-        scheduled.append((args.ai_time, "AI News digest", _run_ai_digest))
-    for key, attr, label in [
-        ("medical",    "medical_time",    "Medical News"),
-        ("pharma",     "pharma_time",     "Pharmaceutical News"),
-        ("genome",     "genome_time",     "Genome Research"),
-        ("genetics",   "genetics_time",   "Genetics Research"),
-        ("energy",     "energy_time",     "Energy News"),
-        ("rare_earth", "rare_earth_time", "Rare Earth News"),
-        ("psychology", "psychology_time", "Psychology News"),
-        ("sports",     "sports_time",     "Sports News"),
+        scheduled.append((args.ai_time, "AI News digest", _run_ai_digest, _days("AI")))
+    for key, attr, label, day_key in [
+        ("medical",    "medical_time",    "Medical News",        "MEDICAL"),
+        ("pharma",     "pharma_time",     "Pharmaceutical News", "PHARMA"),
+        ("genome",     "genome_time",     "Genome Research",     "GENOME"),
+        ("genetics",   "genetics_time",   "Genetics Research",   "GENETICS"),
+        ("energy",     "energy_time",     "Energy News",         "ENERGY"),
+        ("rare_earth", "rare_earth_time", "Rare Earth News",     "RARE_EARTH"),
+        ("psychology", "psychology_time", "Psychology News",     "PSYCHOLOGY"),
+        ("sports",         "sports_time",         "Sports News",         "SPORTS"),
+        ("finance",        "finance_time",        "Finance News",        "FINANCE"),
+        ("entertainment",  "entertainment_time",  "Entertainment News",  "ENTERTAINMENT"),
+        ("music",          "music_time",          "Music News",          "MUSIC"),
     ]:
         t = getattr(args, attr)
         if t:
             cfg = _CHANNEL_CONFIGS[key]
-            scheduled.append((t, label, lambda c=cfg: _run_channel(c)))
+            scheduled.append((t, label, lambda c=cfg: _run_channel(c), _days(day_key)))
 
     if not scheduled:
         parser.error(
@@ -263,15 +319,21 @@ def main() -> int:
         )
 
     print()
-    print("╔══════════════════════════════════════════════════╗")
-    print("║           AI News Bot — Scheduler               ║")
-    print("╠══════════════════════════════════════════════════╣")
-    for t, label, fn in scheduled:
-        schedule.every().day.at(t).do(fn)
-        print(f"║  {label:<24}  →  daily at {t}     ║")
-    print("╠══════════════════════════════════════════════════╣")
-    print("║  Press Ctrl+C to stop                           ║")
-    print("╚══════════════════════════════════════════════════╝")
+    print("╔════════════════════════════════════════════════════════╗")
+    print("║             AI News Bot — Scheduler                   ║")
+    print("╠════════════════════════════════════════════════════════╣")
+    for t, label, fn, days in scheduled:
+        for day in days:
+            job_builder = _DAY_MAP.get(day, _DAY_MAP["daily"])
+            job_builder().at(t).do(fn)
+        if days == ["daily"]:
+            day_label = "daily"
+        else:
+            day_label = ", ".join(d.capitalize() for d in days)
+        print(f"║  {label:<28}  →  {day_label} at {t}  ║")
+    print("╠════════════════════════════════════════════════════════╣")
+    print("║  Press Ctrl+C to stop                                 ║")
+    print("╚════════════════════════════════════════════════════════╝")
     print()
 
     if args.run_now:

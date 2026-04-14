@@ -19,6 +19,7 @@ from src.notifiers import (
     SlackNotifier,
     TelegramNotifier,
     DiscordNotifier,
+    WhatsAppNotifier,
 )
 
 
@@ -116,6 +117,40 @@ _CHANNEL_ROUTING = [
             "baseball", "cricket", "tennis", "nfl", "nba", "mlb", "nhl", "ipl", "bcci",
             "fifa", "premier league", "champions league", "olympics", "athlete",
             "championship", "tournament", "transfer", "match", "league", "playoff",
+        },
+    },
+    {
+        "key": "finance",
+        "title": "Finance News",
+        "token_env": "TELEGRAM_FINANCE_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_FINANCE_CHAT_ID",
+        "keywords": {
+            "finance", "financial", "stock market", "investing", "investment", "economy",
+            "gdp", "inflation", "interest rate", "federal reserve", "wall street",
+            "nasdaq", "nyse", "s&p", "cryptocurrency", "bitcoin", "ethereum",
+            "hedge fund", "earnings", "ipo", "venture capital", "private equity",
+        },
+    },
+    {
+        "key": "entertainment",
+        "title": "Entertainment News",
+        "token_env": "TELEGRAM_ENTERTAINMENT_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_ENTERTAINMENT_CHAT_ID",
+        "keywords": {
+            "entertainment", "movie", "film", "tv show", "television", "series",
+            "celebrity", "hollywood", "box office", "streaming", "netflix", "disney",
+            "hbo", "award", "oscar", "grammy", "emmy", "premiere", "trailer",
+        },
+    },
+    {
+        "key": "music",
+        "title": "Music News",
+        "token_env": "TELEGRAM_MUSIC_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_MUSIC_CHAT_ID",
+        "keywords": {
+            "music", "album", "song", "artist", "band", "concert", "tour", "single",
+            "billboard", "chart", "record label", "spotify", "apple music", "genre",
+            "hip hop", "pop", "rock", "r&b", "country", "jazz", "festival",
         },
     },
 ]
@@ -299,6 +334,14 @@ def main():
                         lang_results["sent"].append("slack")
                     else:
                         lang_results["failed"].append("slack")
+
+                if "whatsapp" in notification_methods:
+                    logger.info(f"Sending WhatsApp digest ({language.upper()})...")
+                    notifier = WhatsAppNotifier()
+                    if notifier.send_digest_summary(digest, language=language):
+                        lang_results["sent"].append("whatsapp")
+                    else:
+                        lang_results["failed"].append("whatsapp")
 
                 for method in lang_results["sent"]:
                     key = f"{method} ({language.upper()})"

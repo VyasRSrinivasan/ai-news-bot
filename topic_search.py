@@ -114,6 +114,27 @@ _SPECIALTY_CHANNELS = {
         "feeds_category": "Sports",
         "topic": "sports football american football basketball soccer baseball cricket tennis NFL NBA MLB IPL FIFA Premier League Olympics championship",
     },
+    "finance": {
+        "title": "Finance News",
+        "token_env": "TELEGRAM_FINANCE_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_FINANCE_CHAT_ID",
+        "feeds_category": "Finance",
+        "topic": "finance stock market investing economy inflation interest rates cryptocurrency bitcoin wall street earnings",
+    },
+    "entertainment": {
+        "title": "Entertainment News",
+        "token_env": "TELEGRAM_ENTERTAINMENT_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_ENTERTAINMENT_CHAT_ID",
+        "feeds_category": "Entertainment",
+        "topic": "entertainment movies TV shows Hollywood celebrities box office streaming Netflix Disney awards",
+    },
+    "music": {
+        "title": "Music News",
+        "token_env": "TELEGRAM_MUSIC_BOT_TOKEN",
+        "chat_id_env": "TELEGRAM_MUSIC_CHAT_ID",
+        "feeds_category": "Music",
+        "topic": "music album release artist concert tour Billboard charts record label pop rock hip hop",
+    },
 }
 
 _MEDICAL_TOPIC_MAP = {
@@ -260,23 +281,29 @@ def _prompt_news_type() -> str:
     print("│  9 │ Sports News                                │")
     print("│    │ Football · Basketball · Soccer · Baseball  │")
     print("│    │ Cricket · Tennis · NFL · NBA · IPL         │")
+    print("│ 10 │ Finance News                               │")
+    print("│    │ Stocks · Crypto · Economy · Wall Street    │")
+    print("│ 11 │ Entertainment News                         │")
+    print("│    │ Movies · TV · Streaming · Celebrity        │")
+    print("│ 12 │ Music News                                 │")
+    print("│    │ Albums · Charts · Artists · Concerts       │")
     print("└────┴────────────────────────────────────────────┘")
     print()
 
     _map = {
         "1": "ai", "2": "medical", "3": "pharma", "4": "genome",
         "5": "genetics", "6": "energy", "7": "rare_earth", "8": "psychology",
-        "9": "sports",
+        "9": "sports", "10": "finance", "11": "entertainment", "12": "music",
     }
     while True:
         try:
-            choice = input("Select news type [1-9]: ").strip()
+            choice = input("Select news type [1-12]: ").strip()
         except (EOFError, KeyboardInterrupt):
             print("\nCancelled.")
             sys.exit(130)
         if choice in _map:
             return _map[choice]
-        print("  Please enter a number between 1 and 9.")
+        print("  Please enter a number between 1 and 12.")
 
 
 def _prompt_category() -> str:

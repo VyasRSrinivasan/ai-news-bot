@@ -48,6 +48,9 @@ Subscribe to receive automated digests directly in Telegram — no setup require
 | --- | --- | --- |
 | **AI News Channel** | Technology · Business & Finance · Science & Research · Politics & Policy · Robotics & EVs | [t.me/ainewsbot01](https://t.me/ainewsbot01) |
 | **Medical News Channel** | Cardiology · Pulmonology · Nephrology · Pediatrics · Endocrinology · Diabetes · Psychiatry · Oncology · AI in Medicine | [t.me/medicalnewsbot01](https://t.me/medicalnewsbot01) |
+| **Finance News Channel** | Markets · Investing · Economy · Crypto · Personal Finance | self-hosted |
+| **Entertainment News Channel** | Movies · TV · Celebrities · Awards · Streaming | self-hosted |
+| **Music News Channel** | Artists · Albums · Tours · Charts · Industry | self-hosted |
 
 > Want to run your own channels? Follow the [setup guide below](#notification-channels-setup) to deploy this bot for any topic.
 
@@ -58,10 +61,10 @@ Subscribe to receive automated digests directly in Telegram — no setup require
 - **Three Modes**: Scheduled daily digest, on-demand topic search, or interactive subscription bot
 - **Subscription Bot**: Users choose their own channels via an inline Telegram keyboard — preferences stored in SQLite
 - **Agentic Topic Search**: Claude autonomously selects and fetches from curated RSS sources based on your topic
-- **8 Specialty Telegram Channels**: AI News, Medical, Pharma, Genome Research, Genetics Research, Energy, Rare Earth, Psychology — each gets only relevant content
+- **12 Specialty Telegram Channels**: AI News, Medical, Pharma, Genome Research, Genetics Research, Energy, Rare Earth, Psychology, Sports, Finance, Entertainment, Music — each gets only relevant content
 - **Medical Specialty Coverage**: Dedicated feeds for Cardiology, Pulmonology, Nephrology, Pediatrics, Endocrinology, **Diabetes**, Psychiatry, Oncology, and AI in Medicine
 - **Category-Curated Feeds**: Each preset category maps to its own hand-picked RSS sources
-- **Interactive News Type Menu**: 8-option menu — the bot routes to the right channel automatically
+- **Interactive News Type Menu**: 12-option menu — the bot routes to the right channel automatically
 - **Structured JSON Digest**: LLM returns categorized stories with importance ratings, pro/con summaries — not raw text
 - **Styled HTML Email**: Digest is rendered from structured JSON into a clean, mobile-friendly HTML email
 - **Telegram & Discord Short Summaries**: Concise embeds with headline + top stories per category, including pro/con per story
@@ -69,7 +72,7 @@ Subscribe to receive automated digests directly in Telegram — no setup require
 - **Multi-Provider LLM Support**: Claude, DeepSeek, Gemini, Grok, or OpenAI
 - **50+ RSS Sources**: TechCrunch, VentureBeat, arXiv, OpenAI Blog, DeepMind, MedPage Today, AHA News, Google News specialty feeds, and more
 - **Multilingual Support**: Generate digests in 13+ languages
-- **Multiple Notification Channels**: Email (Gmail SMTP), Telegram, Discord, Slack, and Webhooks
+- **Multiple Notification Channels**: Email (Gmail SMTP), Telegram, Discord, Slack, Webhooks, and WhatsApp (via Twilio)
 - **GitHub Actions Automation**: Daily cron job with automatic `seen_urls.json` commit
 - **Robust Error Handling**: 3-retry loop on LLM calls, graceful fallbacks
 
@@ -249,7 +252,8 @@ Summarizer.summarize()  ──► JSON digest {date, headline, categories[]}
      │                                                      Energy / Rare Earth channels
      ├──► TelegramNotifier(each specialty subscriber)    → individual subscribers
      ├──► DiscordNotifier.send_digest_summary()          → Discord embed
-     └──► SlackNotifier / WebhookNotifier                → text summary
+     ├──► SlackNotifier / WebhookNotifier                → text summary
+     └──► WhatsAppNotifier.send_digest()                 → WhatsApp message (Twilio)
 ```
 
 ### Interactive Topic Search (`topic_search.py`)
@@ -288,11 +292,13 @@ Summarizer.summarize(topics=[user_topic])
 User sends /subscribe
      │
      ▼
-Inline keyboard — 8 channel toggles (✅ / ☑️)
+Inline keyboard — 12 channel toggles (✅ / ☑️)
      │   🤖 AI News      🏥 Medical News
      │   💊 Pharma        🧬 Genome Research
      │   🔬 Genetics      ⚡ Energy News
      │   ⛏️ Rare Earth   🧠 Psychology
+     │   🏅 Sports        💰 Finance News
+     │   🎬 Entertainment 🎵 Music News
      │
      ▼
 User taps 💾 Save → preferences stored in data/subscriptions.db
@@ -336,7 +342,7 @@ Repository → Settings → Secrets and variables → Actions → New repository
 | --- | --- | --- |
 | `LLM_PROVIDER` | `claude` | Provider: `claude`, `deepseek`, `gemini`, `grok`, `openai` |
 | `ANTHROPIC_API_KEY` | `sk-ant-...` | Anthropic key (if using Claude) |
-| `NOTIFICATION_METHODS` | `telegram` | Comma-separated: `email`, `telegram`, `discord`, `slack`, `webhook` |
+| `NOTIFICATION_METHODS` | `telegram` | Comma-separated: `email`, `telegram`, `discord`, `slack`, `webhook`, `whatsapp` |
 
 #### 📧 Email (if using `email`)
 
@@ -431,6 +437,17 @@ TELEGRAM_MEDICAL_BOT_TOKEN=987654:XYZ...
 TELEGRAM_MEDICAL_CHAT_ID=-1001234567890
 ```
 
+To also deliver via WhatsApp, add `whatsapp` to `NOTIFICATION_METHODS` and supply:
+
+```env
+NOTIFICATION_METHODS=telegram,whatsapp
+
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=your_auth_token_here
+TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
+WHATSAPP_TO=whatsapp:+15551234567
+```
+
 ### 3. Run the Daily Digest
 
 ```bash
@@ -502,14 +519,22 @@ When run without arguments, the script first asks which type of news you want:
 │    │ Lithium · Mining · Critical Minerals       │
 │  8 │ Psychology News                            │
 │    │ Behavioral · Neuroscience · Cognitive      │
+│  9 │ Sports News                                │
+│    │ Scores · Transfers · Leagues · Events      │
+│ 10 │ Finance News                               │
+│    │ Markets · Economy · Crypto · Investing     │
+│ 11 │ Entertainment News                         │
+│    │ Movies · TV · Celebrities · Streaming      │
+│ 12 │ Music News                                 │
+│    │ Artists · Albums · Tours · Charts          │
 └────┴────────────────────────────────────────────┘
 
-Select news type [1-8]:
+Select news type [1-12]:
 ```
 
 - **Option 1** → shows the category menu below, sends to **AI News Channel**
 - **Option 2** → shows the medical specialty submenu below, sends to **Medical News Channel**
-- **Options 3–8** → fetches focused news, sends to the matching specialty channel
+- **Options 3–12** → fetches focused news, sends to the matching specialty channel
 
 ### Category Menu (AI News)
 
@@ -607,13 +632,23 @@ Each channel delivery also sends to individual subscribers who opted in via `bot
 
 ```env
 # Times for the local scheduler (HH:MM, 24-hour format)
+# Group 1 — Mon + Thu (4 channels)
 SCHEDULE_AI_TIME=07:00
-SCHEDULE_MEDICAL_TIME=08:00
-SCHEDULE_PHARMA_TIME=08:30
-SCHEDULE_GENOME_TIME=09:00
-SCHEDULE_GENETICS_TIME=09:30
-SCHEDULE_ENERGY_TIME=10:00
-SCHEDULE_RARE_EARTH_TIME=10:30
+SCHEDULE_MEDICAL_TIME=07:30
+SCHEDULE_PHARMA_TIME=08:00
+SCHEDULE_GENOME_TIME=08:30
+
+# Group 2 — Tue + Fri (4 channels)
+SCHEDULE_GENETICS_TIME=07:00
+SCHEDULE_ENERGY_TIME=07:30
+SCHEDULE_RARE_EARTH_TIME=08:00
+SCHEDULE_PSYCHOLOGY_TIME=08:30
+
+# Group 3 — Wed + Sat (4 channels)
+SCHEDULE_SPORTS_TIME=07:00
+SCHEDULE_FINANCE_TIME=07:30
+SCHEDULE_ENTERTAINMENT_TIME=08:00
+SCHEDULE_MUSIC_TIME=08:30
 ```
 
 > **Note:** The scheduler runs in the foreground. Keep the terminal open (or use a tool like `screen`, `tmux`, or `nohup`) to keep it running.
@@ -650,7 +685,8 @@ ai-news-bot/
 │       ├── telegram_notifier.py    # Telegram — send_digest_summary() with pro/con
 │       ├── discord_notifier.py     # Discord embeds — send_digest_summary()
 │       ├── slack_notifier.py       # Slack
-│       └── webhook_notifier.py     # Generic JSON webhook
+│       ├── webhook_notifier.py     # Generic JSON webhook
+│       └── whatsapp_notifier.py    # WhatsApp via Twilio — send_digest()
 ├── data/
 │   └── subscriptions.db            # SQLite DB — user channel subscriptions (auto-created)
 ├── main.py                         # Daily digest orchestrator
@@ -718,7 +754,7 @@ logging:
 | `XAI_API_KEY` | If using Grok | xAI API key |
 | `OPENAI_API_KEY` | If using OpenAI | OpenAI API key |
 | `LLM_MODEL` | Optional | Override provider's default model |
-| `NOTIFICATION_METHODS` | ✅ Required | Comma-separated: `email`, `telegram`, `discord`, `slack`, `webhook` |
+| `NOTIFICATION_METHODS` | ✅ Required | Comma-separated: `email`, `telegram`, `discord`, `slack`, `webhook`, `whatsapp` |
 | `AI_RESPONSE_LANGUAGE` | Optional | Language code(s), default `en`. Comma-separate for multiple: `en,zh,ja` |
 | `GMAIL_ADDRESS` | Email only | Your Gmail address |
 | `GMAIL_APP_PASSWORD` | Email only | 16-char Gmail App Password |
@@ -737,10 +773,20 @@ logging:
 | `TELEGRAM_ENERGY_CHAT_ID` | Optional | Energy News Channel ID |
 | `TELEGRAM_RARE_EARTH_BOT_TOKEN` | Optional | Bot token for Rare Earth News Channel |
 | `TELEGRAM_RARE_EARTH_CHAT_ID` | Optional | Rare Earth News Channel ID |
+| `TELEGRAM_FINANCE_BOT_TOKEN` | Optional | Bot token for Finance News Channel |
+| `TELEGRAM_FINANCE_CHAT_ID` | Optional | Finance News Channel ID |
+| `TELEGRAM_ENTERTAINMENT_BOT_TOKEN` | Optional | Bot token for Entertainment News Channel |
+| `TELEGRAM_ENTERTAINMENT_CHAT_ID` | Optional | Entertainment News Channel ID |
+| `TELEGRAM_MUSIC_BOT_TOKEN` | Optional | Bot token for Music News Channel |
+| `TELEGRAM_MUSIC_CHAT_ID` | Optional | Music News Channel ID |
 | `DB_PATH` | Optional | Path to subscriptions SQLite DB (default: `data/subscriptions.db`) |
 | `DISCORD_WEBHOOK_URL` | Discord only | Discord Webhook URL |
 | `SLACK_WEBHOOK_URL` | Slack only | Slack Incoming Webhook URL |
 | `WEBHOOK_URL` | Webhook only | Generic JSON webhook endpoint |
+| `TWILIO_ACCOUNT_SID` | WhatsApp only | Twilio Account SID (starts with `AC`) |
+| `TWILIO_AUTH_TOKEN` | WhatsApp only | Twilio Auth Token |
+| `TWILIO_WHATSAPP_FROM` | WhatsApp only | Twilio WhatsApp sender number (e.g. `whatsapp:+14155238886`) |
+| `WHATSAPP_TO` | WhatsApp only | Recipient WhatsApp number (e.g. `whatsapp:+15551234567`) |
 
 ---
 
@@ -823,7 +869,7 @@ NOTIFICATION_METHODS=email
 
 ### Telegram
 
-The bot supports 8 specialty Telegram channels — each receives only its relevant content.
+The bot supports 12 specialty Telegram channels — each receives only its relevant content.
 
 | Channel | Link |
 | --- | --- |
@@ -836,6 +882,9 @@ The bot supports 8 specialty Telegram channels — each receives only its releva
 | Rare Earth News | [t.me/rareearthnewsbot01](https://t.me/rareearthnewsbot01) |
 | Psychology News | [t.me/psychologynewsbot01](https://t.me/psychologynewsbot01) |
 | Sports News | [t.me/sportsnewsbot01](https://t.me/sportsnewsbot01) |
+| Finance News | self-hosted |
+| Entertainment News | self-hosted |
+| Music News | self-hosted |
 
 **To set up your own channel:**
 1. Message [@BotFather](https://t.me/botfather) → `/newbot` → copy the token
@@ -853,8 +902,8 @@ The bot supports 8 specialty Telegram channels — each receives only its releva
 | `python bot.py` → user `/subscribe` | Saves user preferences; digests delivered on next run |
 | `python topic_search.py` → option 1 | AI News Channel |
 | `python topic_search.py` → option 2 | Medical News Channel |
-| `python topic_search.py` → options 3–8 | Pharma / Genome / Genetics / Energy / Rare Earth / Psychology |
-| `python topic_search.py --all` | All 8 channels simultaneously |
+| `python topic_search.py` → options 3–12 | Pharma / Genome / Genetics / Energy / Rare Earth / Psychology / Sports / Finance / Entertainment / Music |
+| `python topic_search.py --all` | All 12 channels simultaneously |
 | `python scheduler.py --medical-time 08:00` | Medical channel + subscribers at 8:00 AM |
 
 ### Subscription Bot
@@ -900,6 +949,28 @@ Receives a JSON POST with the plain-text digest:
 }
 ```
 
+### WhatsApp
+
+Delivered via the [Twilio WhatsApp API](https://www.twilio.com/whatsapp). You'll need a Twilio account and either the Twilio Sandbox (for testing) or an approved WhatsApp sender number.
+
+**Setup steps:**
+
+1. Sign up at [twilio.com](https://www.twilio.com/) and note your **Account SID** and **Auth Token** from the Console Dashboard.
+2. To test with the sandbox: in the Twilio Console go to **Messaging → Try it out → Send a WhatsApp message** and follow the sandbox join instructions on your phone.
+3. Set the four environment variables:
+   ```env
+   TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   TWILIO_AUTH_TOKEN=your_auth_token_here
+   TWILIO_WHATSAPP_FROM=whatsapp:+14155238886   # sandbox number, or your approved sender
+   WHATSAPP_TO=whatsapp:+15551234567            # your WhatsApp number
+   ```
+4. Add `whatsapp` to `NOTIFICATION_METHODS`:
+   ```env
+   NOTIFICATION_METHODS=telegram,whatsapp
+   ```
+
+> **Note:** For production use beyond the sandbox, you must apply for a WhatsApp-approved sender number through Twilio. The sandbox is sufficient for personal or testing use.
+
 ---
 
 ## Deduplication
@@ -940,6 +1011,9 @@ echo "[]" > seen_urls.json
 | Subscription bot not responding | Ensure `python bot.py` is running and `TELEGRAM_AI_BOT_TOKEN` is set |
 | Subscribers not receiving digests | Confirm `bot.py` ran before the user subscribed; check `data/subscriptions.db` exists |
 | Agent fetches 0 articles | Check RSS feed connectivity; fallback keyword mode should activate |
+| WhatsApp message not sending | Verify `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_WHATSAPP_FROM`, and `WHATSAPP_TO` are set; confirm your phone has joined the Twilio sandbox (send the join code) |
+| `TwilioRestException: 63007` | The recipient has not joined the Twilio sandbox — follow the sandbox join instructions and try again |
+| `ModuleNotFoundError: twilio` | Run `pip install -r requirements.txt` (requires `twilio>=8.0.0`) |
 | `ModuleNotFoundError: aiogram` | Run `pip install -r requirements.txt` |
 | `ModuleNotFoundError` | Run `pip install -r requirements.txt` |
 
