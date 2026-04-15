@@ -48,9 +48,9 @@ Subscribe to receive automated digests directly in Telegram — no setup require
 | --- | --- | --- |
 | **AI News Channel** | Technology · Business & Finance · Science & Research · Politics & Policy · Robotics & EVs | [t.me/ainewsbot01](https://t.me/ainewsbot01) |
 | **Medical News Channel** | Cardiology · Pulmonology · Nephrology · Pediatrics · Endocrinology · Diabetes · Psychiatry · Oncology · AI in Medicine | [t.me/medicalnewsbot01](https://t.me/medicalnewsbot01) |
-| **Finance News Channel** | Markets · Investing · Economy · Crypto · Personal Finance | self-hosted |
-| **Entertainment News Channel** | Movies · TV · Celebrities · Awards · Streaming | self-hosted |
-| **Music News Channel** | Artists · Albums · Tours · Charts · Industry | self-hosted |
+| **Finance News Channel** | Markets · Investing · Economy · Crypto · Personal Finance | [t.me/financenewsbot01](https://t.me/financenewsbot01) |
+| **Entertainment News Channel** | Movies · TV · Celebrities · Awards · Streaming | [t.me/entertainmentnewsbot01](https://t.me/entertainmentnewsbot01) |
+| **Music News Channel** | Artists · Albums · Tours · Charts · Industry | [t.me/musicnewsbot01](https://t.me/musicnewsbot01) |
 
 > Want to run your own channels? Follow the [setup guide below](#notification-channels-setup) to deploy this bot for any topic.
 
@@ -882,9 +882,9 @@ The bot supports 12 specialty Telegram channels — each receives only its relev
 | Rare Earth News | [t.me/rareearthnewsbot01](https://t.me/rareearthnewsbot01) |
 | Psychology News | [t.me/psychologynewsbot01](https://t.me/psychologynewsbot01) |
 | Sports News | [t.me/sportsnewsbot01](https://t.me/sportsnewsbot01) |
-| Finance News | self-hosted |
-| Entertainment News | self-hosted |
-| Music News | self-hosted |
+| Finance News | [t.me/financenewsbot01](https://t.me/financenewsbot01) |
+| Entertainment News | [t.me/entertainmentnewsbot01](https://t.me/entertainmentnewsbot01) |
+| Music News | [t.me/musicnewsbot01](https://t.me/musicnewsbot01) |
 
 **To set up your own channel:**
 1. Message [@BotFather](https://t.me/botfather) → `/newbot` → copy the token
