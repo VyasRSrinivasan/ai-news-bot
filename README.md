@@ -16,8 +16,18 @@
 
 ### 📲 Subscribe to Our Telegram Channels
 
-[![AI News](https://img.shields.io/badge/Telegram-AI_News_Channel-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/ainewsbot01)
-[![Medical News](https://img.shields.io/badge/Telegram-Medical_News_Channel-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/medicalnewsbot01)
+[![AI News](https://img.shields.io/badge/Telegram-AI_News-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/ainewsbot01)
+[![Medical News](https://img.shields.io/badge/Telegram-Medical_News-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/medicalnewsbot01)
+[![Pharma News](https://img.shields.io/badge/Telegram-Pharma_News-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/pharmaceuticalindustrynewsbot01)
+[![Genome Research](https://img.shields.io/badge/Telegram-Genome_Research-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/genomenewsbot01)
+[![Genetics Research](https://img.shields.io/badge/Telegram-Genetics_Research-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/geneticsnewsbot01)
+[![Energy News](https://img.shields.io/badge/Telegram-Energy_News-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/energynewsbot01)
+[![Rare Earth News](https://img.shields.io/badge/Telegram-Rare_Earth_News-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/rareearthnewsbot01)
+[![Psychology News](https://img.shields.io/badge/Telegram-Psychology_News-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/psychologynewsbot01)
+[![Sports News](https://img.shields.io/badge/Telegram-Sports_News-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/sportsnewsbot01)
+[![Finance News](https://img.shields.io/badge/Telegram-Finance_News-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/financenewsbot01)
+[![Entertainment News](https://img.shields.io/badge/Telegram-Entertainment_News-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/entertainmentnewsbot01)
+[![Music News](https://img.shields.io/badge/Telegram-Music_News-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/musicnewsbot01)
 
 [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-Automation-2088FF?style=flat-square&logo=github-actions&logoColor=white)](https://github.com/giftedunicorn/ai-news-bot)
 [![Claude](https://img.shields.io/badge/Claude-Sonnet_4.5-FF6B6B?style=flat-square&logo=anthropic&logoColor=white)](https://www.anthropic.com)
@@ -48,6 +58,13 @@ Subscribe to receive automated digests directly in Telegram — no setup require
 | --- | --- | --- |
 | **AI News Channel** | Technology · Business & Finance · Science & Research · Politics & Policy · Robotics & EVs | [t.me/ainewsbot01](https://t.me/ainewsbot01) |
 | **Medical News Channel** | Cardiology · Pulmonology · Nephrology · Pediatrics · Endocrinology · Diabetes · Psychiatry · Oncology · AI in Medicine | [t.me/medicalnewsbot01](https://t.me/medicalnewsbot01) |
+| **Pharmaceutical News Channel** | Drug Discovery · FDA · Clinical Trials · Biotech · Vaccine · Biologics | [t.me/pharmaceuticalindustrynewsbot01](https://t.me/pharmaceuticalindustrynewsbot01) |
+| **Genome Research Channel** | Genomics · Sequencing · CRISPR · Gene Editing · Bioinformatics · Proteomics | [t.me/genomenewsbot01](https://t.me/genomenewsbot01) |
+| **Genetics Research Channel** | Genetics · Gene Therapy · Hereditary · Mutation · Genetic Disorders · Chromosome | [t.me/geneticsnewsbot01](https://t.me/geneticsnewsbot01) |
+| **Energy News Channel** | Solar · Wind · Nuclear · Renewable · Battery · Clean Energy · Hydrogen | [t.me/energynewsbot01](https://t.me/energynewsbot01) |
+| **Rare Earth News Channel** | Lithium · Cobalt · Mining · Critical Minerals · Rare Metals · Battery Materials | [t.me/rareearthnewsbot01](https://t.me/rareearthnewsbot01) |
+| **Psychology News Channel** | Neuroscience · Behavioral Science · Cognitive Science · Mental Health Research | [t.me/psychologynewsbot01](https://t.me/psychologynewsbot01) |
+| **Sports News Channel** | Football · Basketball · Soccer · Baseball · Cricket · Tennis · NFL · NBA · Olympics | [t.me/sportsnewsbot01](https://t.me/sportsnewsbot01) |
 | **Finance News Channel** | Markets · Investing · Economy · Crypto · Personal Finance | [t.me/financenewsbot01](https://t.me/financenewsbot01) |
 | **Entertainment News Channel** | Movies · TV · Celebrities · Awards · Streaming | [t.me/entertainmentnewsbot01](https://t.me/entertainmentnewsbot01) |
 | **Music News Channel** | Artists · Albums · Tours · Charts · Industry | [t.me/musicnewsbot01](https://t.me/musicnewsbot01) |
