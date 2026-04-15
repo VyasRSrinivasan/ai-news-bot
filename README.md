@@ -54,20 +54,22 @@
 
 Subscribe to receive automated digests directly in Telegram — no setup required.
 
-| Channel | Topics | Link |
-| --- | --- | --- |
-| **AI News Channel** | Technology · Business & Finance · Science & Research · Politics & Policy · Robotics & EVs | [t.me/ainewsbot01](https://t.me/ainewsbot01) |
-| **Medical News Channel** | Cardiology · Pulmonology · Nephrology · Pediatrics · Endocrinology · Diabetes · Psychiatry · Oncology · AI in Medicine | [t.me/medicalnewsbot01](https://t.me/medicalnewsbot01) |
-| **Pharmaceutical News Channel** | Drug Discovery · FDA · Clinical Trials · Biotech · Vaccine · Biologics | [t.me/pharmaceuticalindustrynewsbot01](https://t.me/pharmaceuticalindustrynewsbot01) |
-| **Genome Research Channel** | Genomics · Sequencing · CRISPR · Gene Editing · Bioinformatics · Proteomics | [t.me/genomenewsbot01](https://t.me/genomenewsbot01) |
-| **Genetics Research Channel** | Genetics · Gene Therapy · Hereditary · Mutation · Genetic Disorders · Chromosome | [t.me/geneticsnewsbot01](https://t.me/geneticsnewsbot01) |
-| **Energy News Channel** | Solar · Wind · Nuclear · Renewable · Battery · Clean Energy · Hydrogen | [t.me/energynewsbot01](https://t.me/energynewsbot01) |
-| **Rare Earth News Channel** | Lithium · Cobalt · Mining · Critical Minerals · Rare Metals · Battery Materials | [t.me/rareearthnewsbot01](https://t.me/rareearthnewsbot01) |
-| **Psychology News Channel** | Neuroscience · Behavioral Science · Cognitive Science · Mental Health Research | [t.me/psychologynewsbot01](https://t.me/psychologynewsbot01) |
-| **Sports News Channel** | Football · Basketball · Soccer · Baseball · Cricket · Tennis · NFL · NBA · Olympics | [t.me/sportsnewsbot01](https://t.me/sportsnewsbot01) |
-| **Finance News Channel** | Markets · Investing · Economy · Crypto · Personal Finance | [t.me/financenewsbot01](https://t.me/financenewsbot01) |
-| **Entertainment News Channel** | Movies · TV · Celebrities · Awards · Streaming | [t.me/entertainmentnewsbot01](https://t.me/entertainmentnewsbot01) |
-| **Music News Channel** | Artists · Albums · Tours · Charts · Industry | [t.me/musicnewsbot01](https://t.me/musicnewsbot01) |
+Each channel publishes **twice a week** at 7:00–8:30 AM local time.
+
+| Channel | Topics | Schedule | Link |
+| --- | --- | --- | --- |
+| **AI News Channel** | Technology · Business & Finance · Science & Research · Politics & Policy · Robotics & EVs | Mon & Thu · 7:00 AM | [t.me/ainewsbot01](https://t.me/ainewsbot01) |
+| **Energy News Channel** | Solar · Wind · Nuclear · Renewable · Battery · Clean Energy · Hydrogen | Mon & Thu · 7:30 AM | [t.me/energynewsbot01](https://t.me/energynewsbot01) |
+| **Entertainment News Channel** | Movies · TV · Celebrities · Awards · Streaming | Mon & Thu · 8:00 AM | [t.me/entertainmentnewsbot01](https://t.me/entertainmentnewsbot01) |
+| **Finance News Channel** | Markets · Investing · Economy · Crypto · Personal Finance | Mon & Thu · 8:30 AM | [t.me/financenewsbot01](https://t.me/financenewsbot01) |
+| **Genetics Research Channel** | Genetics · Gene Therapy · Hereditary · Mutation · Genetic Disorders · Chromosome | Tue & Fri · 7:00 AM | [t.me/geneticsnewsbot01](https://t.me/geneticsnewsbot01) |
+| **Genome Research Channel** | Genomics · Sequencing · CRISPR · Gene Editing · Bioinformatics · Proteomics | Tue & Fri · 7:30 AM | [t.me/genomenewsbot01](https://t.me/genomenewsbot01) |
+| **Medical News Channel** | Cardiology · Pulmonology · Nephrology · Pediatrics · Endocrinology · Diabetes · Psychiatry · Oncology · AI in Medicine | Tue & Fri · 8:00 AM | [t.me/medicalnewsbot01](https://t.me/medicalnewsbot01) |
+| **Music News Channel** | Artists · Albums · Tours · Charts · Industry | Tue & Fri · 8:30 AM | [t.me/musicnewsbot01](https://t.me/musicnewsbot01) |
+| **Pharmaceutical News Channel** | Drug Discovery · FDA · Clinical Trials · Biotech · Vaccine · Biologics | Wed & Sat · 7:00 AM | [t.me/pharmaceuticalindustrynewsbot01](https://t.me/pharmaceuticalindustrynewsbot01) |
+| **Psychology News Channel** | Neuroscience · Behavioral Science · Cognitive Science · Mental Health Research | Wed & Sat · 7:30 AM | [t.me/psychologynewsbot01](https://t.me/psychologynewsbot01) |
+| **Rare Earth News Channel** | Lithium · Cobalt · Mining · Critical Minerals · Rare Metals · Battery Materials | Wed & Sat · 8:00 AM | [t.me/rareearthnewsbot01](https://t.me/rareearthnewsbot01) |
+| **Sports News Channel** | Football · Basketball · Soccer · Baseball · Cricket · Tennis · NFL · NBA · Olympics | Wed & Sat · 8:30 AM | [t.me/sportsnewsbot01](https://t.me/sportsnewsbot01) |
 
 > Want to run your own channels? Follow the [setup guide below](#notification-channels-setup) to deploy this bot for any topic.
 
